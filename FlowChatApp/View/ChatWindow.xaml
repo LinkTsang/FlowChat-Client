@@ -1,0 +1,113 @@
+﻿<Window x:Class="FlowChatApp.View.ChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FlowChatApp.View"
+        mc:Ignorable="d"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:FlowChatApp.ViewModel"
+        Title="FlowChat"
+        Height="540" Width="960"
+        MinWidth="600"
+        DataContext="{Binding Path=Chat, Source={StaticResource Locator}}"
+        d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:ChatViewModel}">
+            <local:ChatView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UserInfoViewModel}">
+            <local:UserInfoView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:GroupInfoViewModel}">
+            <local:GroupInfoView />
+        </DataTemplate>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid Name="Panel">
+                            <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Stretch"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Panel" Property="Background" Value="LightSkyBlue" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter TargetName="Panel" Property="Background" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Background="{DynamicResource MaterialDesignBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="200" Width="200"/>
+            <ColumnDefinition MinWidth="200" Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0"
+                    Orientation="Horizontal"
+                    Background="{DynamicResource MaterialDesignLightBackground}"
+                    DataContext="{Binding CurrentAccount}"
+                    Width="200">
+            <ToggleButton Margin="10"
+                     Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
+            <Grid Margin="0" Width="143">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition
+                        Width="Auto" />
+                    <ColumnDefinition
+                        Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    Style="{DynamicResource MaterialDesignToolButton}">
+                    <md:PackIcon
+                        Kind="Magnify"
+                        Opacity=".56" />
+                </Button>
+                <TextBox
+                    Grid.Column="1"
+                    Margin="8 0 8 0"
+                    md:HintAssist.Hint="Search"
+                    md:TextFieldAssist.DecorationVisibility="Hidden"
+                    BorderThickness="0"
+                    VerticalAlignment="Center" />
+            </Grid>
+        </StackPanel>
+        <Border Grid.Row="0" Grid.Column="1"
+                BorderThickness="0,1,0,1">
+            <TextBlock x:Name="TitleBar" 
+                       HorizontalAlignment="Left" VerticalAlignment="Center"
+                       Margin="5"
+                       FontSize="20"
+                       Text="{Binding CurrentChat.PeerName}"/>
+        </Border>
+        <TabControl Grid.Row="1" Grid.Column="0"
+                    TabStripPlacement="Bottom"
+                    BorderThickness="0"
+                    Background="{DynamicResource MaterialDesignLightBackground}">
+            <TabItem Header="Chat" d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                <local:ChatListView/>
+            </TabItem>
+            <TabItem Header="Contract">
+                <local:ContractListView/>
+            </TabItem>
+            <TabItem Header="Group">
+                <local:GroupListView/>
+            </TabItem>
+        </TabControl>
+        <ContentControl Grid.Row="1" Grid.Column="1"
+                        Content="{Binding CurrentContentViewModel}"/>
+    </Grid>
+</Window>

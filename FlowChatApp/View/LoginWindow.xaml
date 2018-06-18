@@ -1,0 +1,26 @@
+﻿<Window x:Class="FlowChatApp.View.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FlowChatApp.View"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:FlowChatApp.ViewModel"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Title="Flow Chat" Height="300" Width="400"
+        DataContext="{Binding Path=Login, Source={StaticResource Locator}}"
+        d:DataContext="{Binding Path=Login, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:SignInViewModel}">
+            <local:SignInView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SignUpViewModel}">
+            <local:SignUpView />
+        </DataTemplate>
+    </Window.Resources>
+    <Grid Margin="16" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ContentControl Content="{Binding CurrentLoginViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    </Grid>
+</Window>

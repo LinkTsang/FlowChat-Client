@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="FlowChatApp.View.ContractListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FlowChatApp.View"
+             xmlns:m="clr-namespace:FlowChatApp.Model"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="200"
+             d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}">
+    <UserControl.Resources>
+        <DataTemplate x:Key="ContractTemplate" DataType="{x:Type m:Contract}">
+            <ContentControl>
+                <WrapPanel>
+                    <Image Width="50" Height="50" Source="{Binding User.Avatar}"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding User.NickName}" TextWrapping="NoWrap"/>
+                        <TextBlock Text="{Binding User.Status}" />
+                    </StackPanel>
+                </WrapPanel>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="ContractWithAliasTemplate" DataType="{x:Type m:Contract}">
+            <ContentControl>
+                <WrapPanel>
+                    <Image Width="50" Height="50" Source="{Binding User.Avatar}"/>
+                    <StackPanel>
+                        <WrapPanel>
+                            <TextBlock Text="{Binding Alias}" TextWrapping="NoWrap"/>
+                            <TextBlock Foreground="Gray" Text=" ("/>
+                            <TextBlock Foreground="Gray" Text="{Binding User.NickName}" TextWrapping="NoWrap"/>
+                            <TextBlock Foreground="Gray" Text=") "/>
+                        </WrapPanel>
+                        <TextBlock Text="{Binding User.Status}" />
+                    </StackPanel>
+                </WrapPanel>
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
+    <ListView ItemsSource="{Binding Contracts}"
+              SelectedItem="{Binding CurrentContract}"
+              BorderThickness="0"
+              Background="{x:Null}">
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <ContentControl Content="{Binding}">
+                    <ContentControl.Style>
+                        <Style TargetType="{x:Type ContentControl}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource ContractWithAliasTemplate}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Alias}" Value="">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource ContractTemplate}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
+</UserControl>
