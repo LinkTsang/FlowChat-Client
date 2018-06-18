@@ -113,7 +113,8 @@
                  AcceptsReturn="True"
                  TextWrapping="Wrap"
                  FontSize="17"
-                 Text="{Binding ContentToSend}">
+                 md:HintAssist.Hint="Message To Send..."
+                 Text="{Binding ContentToSend, UpdateSourceTrigger=PropertyChanged}">
         </TextBox>
         <Button Grid.Row="3" HorizontalAlignment="Right" Margin="0,5,10,5" Command="{Binding SendCommand}">Send</Button>
     </Grid>

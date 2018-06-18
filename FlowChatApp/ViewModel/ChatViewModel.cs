@@ -94,18 +94,28 @@ namespace FlowChatApp.ViewModel
             get => _contentToSend;
             set => Set(ref _contentToSend, value);
         }
+
         /// <summary>
         /// Initializes a new instance of the ChatViewModel class.
         /// </summary>
         public ChatViewModel()
         {
             CurrentContentViewModel = this;
+
+            PropertyChanged += ChatViewModel_PropertyChanged;
+
             SendCommand = new RelayCommand(SendMessage, () => !string.IsNullOrEmpty(ContentToSend));
 
             SetUpDesignData();
         }
 
-
+        void ChatViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(ContentToSend))
+            {
+                SendCommand.RaiseCanExecuteChanged();
+            }
+        }
 
         public RelayCommand SendCommand { get; }
 
