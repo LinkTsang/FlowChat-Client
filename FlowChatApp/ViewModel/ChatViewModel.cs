@@ -54,9 +54,9 @@ namespace FlowChatApp.ViewModel
             get => _currentContract;
             set
             {
+                Set(ref _currentContract, value);
                 ViewModelLocator.UserInfo.Contract = CurrentContract;
                 CurrentContentViewModel = ViewModelLocator.UserInfo;
-                Set(ref _currentContract, value);
             }
         }
 
@@ -68,9 +68,9 @@ namespace FlowChatApp.ViewModel
             get => _currentGroup;
             set
             {
+                Set(ref _currentGroup, value);
                 ViewModelLocator.GroupInfo.Group = CurrentGroup;
                 CurrentContentViewModel = ViewModelLocator.GroupInfo;
-                Set(ref _currentGroup, value);
             }
         }
 
@@ -133,19 +133,7 @@ namespace FlowChatApp.ViewModel
             ContentToSend = string.Empty;
         }
 
-        public RelayCommand ChatWithContractCommand { get; }
 
-        void ShowChatInfo()
-        {
-
-        }
-
-        public RelayCommand ChatWithGroupCommand { get; }
-
-        void ShowContractInfo()
-        {
-
-        }
 
         void SetUpDesignData()
         {

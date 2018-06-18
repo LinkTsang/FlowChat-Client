@@ -34,27 +34,36 @@
                 </StackPanel>
             </DataTemplate>
         </GroupBox.HeaderTemplate>
+        <Grid>
+            <Button 
+                Style="{DynamicResource MaterialDesignFloatingActionMiniAccentButton}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Command="{Binding ChatWithGroupCommand}"
+                Margin="0,-30,10,170">
+                <materialDesign:PackIcon Kind="MessageProcessing"/>
+            </Button>
+            <ListView ItemsSource="{Binding Group.Members}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type model:User}">
+                                    <Image Source="{Binding Avatar}" Width="25" Height="25"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
 
-        <ListView Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                      ItemsSource="{Binding Group.Members}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type model:User}">
-                                <Image Source="{Binding Avatar}" Width="25" Height="25"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                        
-                    <GridViewColumn
+                        <GridViewColumn
                             DisplayMemberBinding="{Binding UserName}"
                             Header="UserName" />
-                    <GridViewColumn
+                        <GridViewColumn
                             DisplayMemberBinding="{Binding NickName}"
                             Header="NickName" />
-                </GridView>
-            </ListView.View>
-        </ListView>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+
     </GroupBox>
 </UserControl>

@@ -21,12 +21,23 @@
                 Style="{DynamicResource MaterialDesignFloatingActionMiniAccentButton}"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
+                Command="{Binding ChatWithContractCommand}"
                 Margin="0 0 16 -20">
-                <md:PackIcon
-                    Kind="MessageProcessing" />
+                <md:PackIcon Kind="MessageProcessing"/>
             </Button>
             <StackPanel Grid.Row="1" Margin="10,20,10,5">
-                <TextBlock Foreground="{DynamicResource PrimaryHueMidBrush}"  FontSize="25" Text="{Binding Contract.Alias}" HorizontalAlignment="Center"/>
+                <TextBlock Foreground="{DynamicResource PrimaryHueMidBrush}"  FontSize="25" HorizontalAlignment="Center">
+                    <TextBlock.Resources>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="{Binding Contract.Alias}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Contract.Alias}" Value="">
+                                    <Setter Property="Text" Value="{Binding Contract.User.UserName}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Resources>
+                </TextBlock>
                 <TextBlock Foreground="{DynamicResource PrimaryHueLightBrush}" FontSize="12" Text="{Binding Contract.User.Status}" HorizontalAlignment="Center"/>
             </StackPanel>
             <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
