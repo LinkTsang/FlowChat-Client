@@ -71,7 +71,7 @@ namespace FlowChatApp.Service
             {
                 while (!_cancellationToken.IsCancellationRequested)
                 {
-                    
+
                 }
             }
 
@@ -95,7 +95,7 @@ namespace FlowChatApp.Service
                 var result = JObject.Parse(s);
                 var code = result["code"].Value<int>();
                 var message = result["msg"].Value<string>();
-                var data = result["data"] as JObject;
+                var data = result["data"];
                 return new Result((ResultCode)code, message, data);
             }
             return Result.BadRequest;
@@ -135,8 +135,8 @@ namespace FlowChatApp.Service
                     var result = JObject.Parse(s);
                     var code = result["code"].Value<int>();
                     var message = result["msg"].Value<string>();
-                    var data = result["data"] as JObject;
-                    return new Result((ResultCode) code, message, data);
+                    var data = result["data"];
+                    return new Result((ResultCode)code, message, data);
                 }
             }
             catch (HttpRequestException e)
@@ -166,6 +166,7 @@ namespace FlowChatApp.Service
         public event EventHandler<ChatMessage> ChatMessageReceived;
         public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
 
+        #region sign service
         public async Task<Result<TokenClass>> SignInAsync(string username, string password)
         {
             var jObject = new JObject
@@ -198,62 +199,172 @@ namespace FlowChatApp.Service
         {
             return await PostRequestAsync("/api/service/logout");
         }
+        #endregion
+
+
+        #region account service
+
 
         public async Task<Result<User>> GetAccountInfo()
         {
             return await PostRequestAsync<User>("/api/auth/searchUserInfo");
         }
 
-        //public Task<Result<User>> GetAccountInfo(params string[] ids)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public async Task<Result<User>> UpdateUserInfo(User user)
         {
             return await PostRequestAsync<User>("/api/auth/modifyUserInfo", JObject.FromObject(user));
         }
 
+        public async Task<Result> UploadAvator(string filename, byte[] avator)
+        {
+            var content = new ByteArrayContent(avator);
+
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Headers.Add("token", _token);
+            multipartContent.Add(content, "file", filename);
+
+            try
+            {
+                var response = await _httpClient.PostAsync("/api/auth/uploadDownload/uploadImage", multipartContent, _cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    Trace.WriteLine(responseContent);
+                }
+                else if (response.Content.Headers.ContentType.MediaType == "application/json")
+                {
+                    var s = await response.Content.ReadAsStringAsync();
+                    var result = JObject.Parse(s);
+                    var code = result["code"].Value<int>();
+                    var message = result["msg"].Value<string>();
+                    var data = result["data"] as JObject;
+                    return new Result((ResultCode)code, message, data);
+                }
+            }
+            catch (SocketException e)
+            {
+                Trace.WriteLine(e);
+                return new Result(ResultCode.Bad, e.Message, null);
+            }
+
+            return Result.BadRequest;
+        }
+
+        public async Task<Result<byte[]>> GetAvator()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/auth/uploadDownload/downloadImage", _cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    Trace.WriteLine(responseContent);
+                }
+                else if (response.Content.Headers.ContentType.MediaType == "application/json")
+                {
+                    var s = await response.Content.ReadAsStringAsync();
+                    var result = JObject.Parse(s);
+                    var code = result["code"].Value<int>();
+                    var message = result["msg"].Value<string>();
+                    return new Result<byte[]>((ResultCode)code, message);
+                }
+                else
+                {
+                    var content = await response.Content.ReadAsByteArrayAsync();
+                    return new Result<byte[]>(ResultCode.Ok, "OK", content);
+                }
+            }
+            catch (SocketException e)
+            {
+                Trace.WriteLine(e);
+                return Result<byte[]>.ErrorMessage(e.Message);
+            }
+
+            return Result<byte[]>.ErrorMessage("Failed to get the avator");
+        }
+        #endregion
+
+
         public async Task<Result<User>> SearchUser(SearchType type, string value)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region contact service
+
+        public async Task<Result<List<Contract>>> GetContacts()
+        {
+            var result = await PostRequestAsync("/api/auth/searchAllCategorys");
+            if (result.HasError)
+            {
+                return new Result<List<Contract>>(result.Code, result.Message);
+            }
+
+            if (!(result.Data is JArray catetories))
+            {
+                return Result<List<Contract>>.ErrorMessage("Error");
+            }
+
+            var list = new List<Contract>();
+            foreach (var cateory in catetories)
+            {
+                if (!(cateory is JObject c))
+                {
+                    return Result<List<Contract>>.ErrorMessage("Error");
+                }
+                var catetoryName = c["catetoryName"].Value<string>();
+                if (!(c["categoryMemberInfos"] is JArray categoryMemberInfos))
+                {
+                    return Result<List<Contract>>.ErrorMessage("Error");
+                }
+                foreach(var member in categoryMemberInfos)
+                {
+                    var user = member.ToObject<User>();
+                    var contract = new Contract(user, "", catetoryName);
+                    list.Add(contract);
+                }
+            }
+            return new Result<List<Contract>>(ResultCode.Ok, "OK", list);
+        }
+
+        public async Task<Result> GetContactStatus(params string[] ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Result> AddContact(string username, string categoryName, string message)
         {
             var jObject = new JObject()
             {
-                ["userid"] = value,
+                ["username"] = username,
+                ["categoryName"] = categoryName,
+                ["message"] = message,
             };
-            return await PostRequestAsync<User>("/api/service/searchUserInfo", jObject);
+            return await PostRequestAsync("/api/auth/addFriend", jObject);
         }
 
-        public Task<Result<Contract>> GetContacts()
+        public async Task<Result<List<ContractInvation>>> GetContractInvation()
         {
-            throw new NotImplementedException();
+            return await PostRequestAsync<List<ContractInvation>>("/api/auth/searchcontactinvation");
         }
 
-        public Task<Result> GetContactStatus(params string[] ids)
+        public async Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName)
         {
-            throw new NotImplementedException();
+            var jObject = new JObject()
+            {
+                ["recordId"] = recordId,
+                ["categoryName"] = categoryName,
+            };
+            return await PostRequestAsync<List<ContractInvation>>("/api/auth/confirmcontactinvation", jObject);
         }
 
-        public Task<Result> AddContact(string username, string categoryName, string message)
+        public async Task<Result> DeleteContact(string id)
         {
-            //var jObject = new JObject()
-            //{
-            //    ["username"] = username,
-            //    ["categoryName"] = categoryName,
-            //    ["message"] = message,
-            //};
-            //return await PostRequestAsync("/api/service/searchUserInfo", jObject);
-            throw new NotImplementedException();
-
-        }
-
-        public Task<Result<List<ContractInvation>>> GetContractInvation()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result> DeleteContact(string id)
-        {
-            throw new NotImplementedException();
+            var jObject = new JObject()
+            {
+                ["memberId"] = id,
+            };
+            return await PostRequestAsync("/api/auth/confirmcontactinvation", jObject);
         }
 
         public Task<Result<List<string>>> GetBlocked()
@@ -270,6 +381,123 @@ namespace FlowChatApp.Service
         {
             throw new NotImplementedException();
         }
+
+        #endregion
+
+        #region group
+
+        public async Task<Result> AddGroup(string groupName)
+        {
+            var jObject = new JObject()
+            {
+                ["groupName"] = groupName
+            };
+            return await PostRequestAsync("/api/auth/addGroup", jObject);
+        }
+
+        public async Task<Result> RenameGroup(string oldName, string newName)
+        {
+            var jObject = new JObject()
+            {
+                ["oldName"] = oldName,
+                ["newName"] = newName
+            };
+            return await PostRequestAsync("/api/auth/modifyGroup", jObject);
+        }
+
+        public async Task<Result> AddGroupMember(string groupName, string userName)
+        {
+            var jObject = new JObject()
+            {
+                ["groupName"] = groupName,
+                ["userName"] = userName
+            };
+            return await PostRequestAsync("/api/auth/addGroupMember", jObject);
+        }
+
+        public async Task<Result> DeleteGroup(string groupName)
+        {
+            var jObject = new JObject()
+            {
+                ["groupName"] = groupName
+            };
+            return await PostRequestAsync("/api/auth/deleteGroup", jObject);
+        }
+
+        public async Task<Result<List<Group>>> SearchGroup(string groupName)
+        {
+            var jObject = new JObject()
+            {
+                ["groupName"] = groupName
+            };
+            var result = await PostRequestAsync("/api/auth/searchGroup", jObject);
+            if (result.HasError)
+            {
+                return new Result<List<Group>>(result.Code, result.Message);
+            }
+
+            if (!(result.Data is JArray group))
+            {
+                return Result<List<Group>>.ErrorMessage("Error");
+            }
+
+            var list = new List<Group>();
+            foreach (var cateory in group)
+            {
+                if (!(cateory is JObject c))
+                {
+                    return Result<List<Group>>.ErrorMessage("Error");
+                }
+                var g = new Group {Name = c["groupName"].Value<string>()};
+                if (!(c["groupMemberInfos"] is JArray groupMemberInfos))
+                {
+                    return Result<List<Group>>.ErrorMessage("Error");
+                }
+                foreach(var member in groupMemberInfos)
+                {
+                    var user = member.ToObject<User>();
+                    g.Members.Add(user);
+                }
+                list.Add(g);
+            }
+            return new Result<List<Group>>(ResultCode.Ok, "OK", list);
+        }
+
+        public async Task<Result<List<Group>>> SearchAllGroup()
+        {
+            var result = await PostRequestAsync("/api/auth/searchGroup");
+            if (result.HasError)
+            {
+                return new Result<List<Group>>(result.Code, result.Message);
+            }
+
+            if (!(result.Data is JArray group))
+            {
+                return Result<List<Group>>.ErrorMessage("Error");
+            }
+
+            var list = new List<Group>();
+            foreach (var cateory in group)
+            {
+                if (!(cateory is JObject c))
+                {
+                    return Result<List<Group>>.ErrorMessage("Error");
+                }
+                var g = new Group {Name = c["groupName"].Value<string>()};
+                if (!(c["groupMemberInfos"] is JArray groupMemberInfos))
+                {
+                    return Result<List<Group>>.ErrorMessage("Error");
+                }
+                foreach(var member in groupMemberInfos)
+                {
+                    var user = member.ToObject<User>();
+                    g.Members.Add(user);
+                }
+                list.Add(g);
+            }
+            return new Result<List<Group>>(ResultCode.Ok, "OK", list);
+        }
+        #endregion
 
         public Task<Result> SendMessage(string userId, string content)
         {

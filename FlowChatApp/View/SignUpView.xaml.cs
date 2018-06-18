@@ -13,8 +13,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using FlowChatApp.Service2;
-using FlowChatApp.Service2.Interfaces;
 using FlowChatApp.View.Interface;
 using GalaSoft.MvvmLight.Ioc;
 

@@ -27,17 +27,23 @@ namespace FlowChatApp.Service
         public T Data { get; set; }
 
         public bool Ok => Code == ResultCode.Ok;
-        public bool Error => Code != ResultCode.Ok;
+        public bool HasError => Code != ResultCode.Ok;
+
+        public static Result<T> ErrorMessage(string message)
+        {
+            return new Result<T>(ResultCode.Bad, message, null);
+        }
 
     }
 
-    public class Result : Result<JObject>
+    public class Result : Result<JToken>
     {
-        public Result(ResultCode code, string message, JObject data)
+        public Result(ResultCode code, string message, JToken data)
             : base(code, message, data)
         {
         }
 
-        public static Result BadRequest = new Result(ResultCode.Bad, "请求错误", null);
+        public static Result BadRequest = new Result(ResultCode.Bad, "BadRequest", null);
+
     }
 }

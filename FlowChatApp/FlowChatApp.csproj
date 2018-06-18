@@ -202,7 +202,6 @@
     <Compile Include="Model\User.cs" />
     <Compile Include="Service\WindowService.cs" />
     <Compile Include="ViewModel\SignInViewModel.cs" />
-    <Compile Include="ViewModel\ChatViewModel233.cs" />
     <Compile Include="ViewModel\ChatViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Compile Include="View\ChatView.xaml.cs">

@@ -107,8 +107,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ObjectDumper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services2\ChatServiceTests.cs" />
     <Compile Include="Service\ChatServiceTests.cs" />
     <Compile Include="Service\ResultTests.cs" />
     <Compile Include="ViewModels\AuthViewModelTests.cs" />

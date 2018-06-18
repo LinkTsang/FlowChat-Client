@@ -2,11 +2,13 @@
 using FlowChatApp.Service;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlowChatApp.Model;
 using FlowChatApp.Service.Interface;
+using FlowChatAppTests;
 
 namespace FlowChatApp.Service.Tests
 {
@@ -26,7 +28,7 @@ namespace FlowChatApp.Service.Tests
         }
 
         [TestMethod()]
-        public async void SignUpAsyncTest()
+        public async Task SignUpAsyncTest()
         {
             //IChatService chatService = new ChatService("http://127.0.0.1:8081");
             //var result = await chatService.SignUpAsync("test@flowchat.com", "test", "test", "123456");
@@ -45,9 +47,25 @@ namespace FlowChatApp.Service.Tests
         }
 
         [TestMethod()]
-        public async void ModifyUserInfo()
+        public async Task SignInTest()
         {
+            var chatService = new ChatService("http://127.0.0.1:8081");
+            var signInResult = await chatService.SignInAsync("test0", "123");
+            Assert.IsTrue(signInResult.Ok);
+        }
 
+        [TestMethod()]
+        public async Task ContractsTest()
+        {
+            var chatService = new ChatService("http://127.0.0.1:8081");
+
+            var signInResult = await chatService.SignInAsync("test0", "123");
+            Assert.IsTrue(signInResult.Ok);
+
+            var getContactsResult = await chatService.GetContacts();
+            Assert.IsTrue(getContactsResult.Ok);
+            var contracts = getContactsResult.Data;
+            Trace.WriteLine(ObjectDumper.Dump(contracts));
         }
     }
 }

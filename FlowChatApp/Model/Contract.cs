@@ -19,9 +19,10 @@ namespace FlowChatApp.Model
             _user = user;
         }
 
-        public Contract(User user, string alias) : this(user)
+        public Contract(User user, string alias, string category = "") : this(user)
         {
             _alias = alias;
+            _category = category;
         }
 
         User _user;
@@ -53,24 +54,24 @@ namespace FlowChatApp.Model
 
         }
 
-        public ContractInvation(string id, string userId, string message)
+        public ContractInvation(string recordId, string friendName, string message)
         {
-            _id = id;
-            _userId = userId;
+            _recordId = recordId;
+            _friendName = friendName;
             _message = message;
         }
 
-        string _id = string.Empty;
-        public string Id
+        string _recordId = string.Empty;
+        public string RecordId
         {
-            get => _id;
-            set => Set(ref _id, value);
+            get => _recordId;
+            set => Set(ref _recordId, value);
         }
-        string _userId = string.Empty;
-        public string UserId
+        string _friendName = string.Empty;
+        public string FriendName
         {
-            get => _userId;
-            set => Set(ref _userId, value);
+            get => _friendName;
+            set => Set(ref _friendName, value);
         }
         string _message = string.Empty;
         public string Message
