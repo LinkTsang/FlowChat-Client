@@ -40,6 +40,7 @@ namespace FlowChatApp.ViewModel
             SimpleIoc.Default.Register<SignInViewModel>();
             SimpleIoc.Default.Register<SignUpViewModel>();
 
+            SimpleIoc.Default.Register<AccountInfoViewModel>();
             SimpleIoc.Default.Register<UserInfoViewModel>();
             SimpleIoc.Default.Register<GroupInfoViewModel>();
 
@@ -64,6 +65,11 @@ namespace FlowChatApp.ViewModel
         public SignUpViewModel SignUp
         {
             get => ServiceLocator.Current.GetInstance<SignUpViewModel>();
+        }
+
+        public AccountInfoViewModel AccountInfo
+        {
+            get => ServiceLocator.Current.GetInstance<AccountInfoViewModel>();
         }
 
         public UserInfoViewModel UserInfo

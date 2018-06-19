@@ -109,11 +109,17 @@ namespace FlowChatApp.ViewModel
             SetUpDesignData();
         }
 
+        AccountInfoViewModel AccountInfoViewModel => ServiceLocator.Current.GetInstance<AccountInfoViewModel>();
         void ChatViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == nameof(ContentToSend))
+            switch (e.PropertyName)
             {
-                SendCommand.RaiseCanExecuteChanged();
+                case nameof(ContentToSend):
+                    SendCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(CurrentAccount):
+                   AccountInfoViewModel.Account = CurrentAccount;
+                    break;
             }
         }
 

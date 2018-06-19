@@ -47,67 +47,93 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid Background="{DynamicResource MaterialDesignBackground}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="200" Width="200"/>
-            <ColumnDefinition MinWidth="200" Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0"
+    <md:DialogHost>
+        <md:DialogHost.DialogContent>
+            <local:AccountInfoView/>
+        </md:DialogHost.DialogContent>
+        <md:DrawerHost HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   BorderThickness="0"
+                   BorderBrush="{DynamicResource MaterialDesignDivider}"
+                   IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
+            <md:DrawerHost.LeftDrawerContent>
+                <StackPanel Margin="16" Width="200" HorizontalAlignment="Center">
+                    <Button Width="100" Height="100" Padding="0" Margin="10" Command="{x:Static md:DialogHost.OpenDialogCommand}">
+                        <Image Width="100" Height="100" Source="{Binding CurrentAccount.Avatar}" Cursor="Hand"/>
+                    </Button>
+                    <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,10">
+                        <TextBlock Text="{Binding CurrentAccount.UserName}"/>
+                        <TextBlock Foreground="Gray" Text=" ("/>
+                        <TextBlock Foreground="Gray" Text="{Binding CurrentAccount.NickName}"/>
+                        <TextBlock Foreground="Gray" Text=") "/>
+                    </WrapPanel>
+                    <TextBlock Margin="0,0,0,0" Foreground="Gray" Text="FlowChat" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </md:DrawerHost.LeftDrawerContent>
+            <Grid Background="{DynamicResource MaterialDesignBackground}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="200" Width="200"/>
+                    <ColumnDefinition MinWidth="200" Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="0" Grid.Column="0"
                     Orientation="Horizontal"
                     Background="{DynamicResource MaterialDesignLightBackground}"
                     DataContext="{Binding CurrentAccount}"
                     Width="200">
-            <ToggleButton Margin="10"
-                     Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
-            <Grid Margin="0" Width="143">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition
+                    <ToggleButton Margin="10"
+                     Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
+                     IsChecked="False" x:Name="MenuToggleButton"/>
+                    <Grid Margin="0" Width="143">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition
                         Width="Auto" />
-                    <ColumnDefinition
+                            <ColumnDefinition
                         Width="*" />
-                </Grid.ColumnDefinitions>
-                <Button
+                        </Grid.ColumnDefinitions>
+                        <Button
                     Style="{DynamicResource MaterialDesignToolButton}">
-                    <md:PackIcon
+                            <md:PackIcon
                         Kind="Magnify"
                         Opacity=".56" />
-                </Button>
-                <TextBox
+                        </Button>
+                        <TextBox
                     Grid.Column="1"
                     Margin="8 0 8 0"
                     md:HintAssist.Hint="Search"
                     md:TextFieldAssist.DecorationVisibility="Hidden"
                     BorderThickness="0"
                     VerticalAlignment="Center" />
-            </Grid>
-        </StackPanel>
-        <Border Grid.Row="0" Grid.Column="1"
+                    </Grid>
+                </StackPanel>
+                <Border Grid.Row="0" Grid.Column="1"
                 BorderThickness="0,1,0,1">
-            <TextBlock x:Name="TitleBar" 
+                    <TextBlock x:Name="TitleBar" 
                        HorizontalAlignment="Left" VerticalAlignment="Center"
                        Margin="5"
                        FontSize="20"
                        Text="{Binding CurrentChat.PeerName}"/>
-        </Border>
-        <TabControl Grid.Row="1" Grid.Column="0"
+                </Border>
+                <TabControl Grid.Row="1" Grid.Column="0"
                     TabStripPlacement="Bottom"
                     BorderThickness="0"
                     Background="{DynamicResource MaterialDesignLightBackground}">
-            <TabItem Header="Chat" d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
-                <local:ChatListView/>
-            </TabItem>
-            <TabItem Header="Contract">
-                <local:ContractListView/>
-            </TabItem>
-            <TabItem Header="Group">
-                <local:GroupListView/>
-            </TabItem>
-        </TabControl>
-        <ContentControl Grid.Row="1" Grid.Column="1"
+                    <TabItem Header="Chat" d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        <local:ChatListView/>
+                    </TabItem>
+                    <TabItem Header="Contract">
+                        <local:ContractListView/>
+                    </TabItem>
+                    <TabItem Header="Group">
+                        <local:GroupListView/>
+                    </TabItem>
+                </TabControl>
+                <ContentControl Grid.Row="1" Grid.Column="1"
                         Content="{Binding Path=CurrentContentViewModel, Mode=TwoWay}"/>
-    </Grid>
+            </Grid>
+        </md:DrawerHost>
+    </md:DialogHost>
 </Window>

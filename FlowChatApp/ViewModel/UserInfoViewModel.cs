@@ -45,6 +45,7 @@ namespace FlowChatApp.ViewModel
             {
                 var c = new PrivateChat(currentUser);
                 chat.Chats.Add(c);
+                result = c;
             }
             chat.CurrentChat = result;
             chat.CurrentContentViewModel = chat;

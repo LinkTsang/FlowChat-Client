@@ -37,6 +37,7 @@ namespace FlowChatApp.ViewModel
             {
                 var c = new GroupChat(Group);
                 chat.Chats.Add(c);
+                result = c;
             }
             chat.CurrentChat = result;
             chat.CurrentContentViewModel = chat;

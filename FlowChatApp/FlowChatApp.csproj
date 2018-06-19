@@ -132,6 +132,7 @@
     <Compile Include="ViewModel\SearchViewModel.cs" />
     <Compile Include="ViewModel\SignUpViewModel.cs" />
     <Compile Include="ViewModel\GroupInfoViewModel.cs" />
+    <Compile Include="ViewModel\AccountInfoViewModel.cs" />
     <Compile Include="View\Interface\ISignUpView.cs" />
     <Compile Include="View\Interface\ISignInView.cs" />
     <Compile Include="Service\Interface\IWindowService.cs" />
@@ -149,6 +150,9 @@
     </Compile>
     <Compile Include="View\GroupInfoView.xaml.cs">
       <DependentUpon>GroupInfoView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\AccountInfoView.xaml.cs">
+      <DependentUpon>AccountInfoView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\UserInfoView.xaml.cs">
       <DependentUpon>UserInfoView.xaml</DependentUpon>
@@ -224,6 +228,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\GroupInfoView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\AccountInfoView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
