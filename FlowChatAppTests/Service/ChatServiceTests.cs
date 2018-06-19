@@ -43,7 +43,7 @@ namespace FlowChatApp.Service.Tests
             var signUpResult = await chatService.SignUpAsync(user.Email, user.UserName, user.NickName, "1231231");
             var signInResult = await chatService.SignInAsync(user.UserName, "1231231");
 
-            var result = await chatService.UpdateUserInfo(user);
+            var result = await chatService.UpdateAccountInfo(user);
         }
 
         [TestMethod()]

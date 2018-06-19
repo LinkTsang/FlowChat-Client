@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:FlowChatApp.ViewModel"
              xmlns:view="clr-namespace:FlowChatApp.View"
              x:Class="FlowChatApp.App" 
-             StartupUri="View/ChatWindow.xaml">
+             StartupUri="View/LoginWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

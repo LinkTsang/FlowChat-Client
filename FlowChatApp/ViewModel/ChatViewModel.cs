@@ -1,11 +1,14 @@
 using CommonServiceLocator;
 using FlowChatApp.Model;
+using FlowChatApp.Service.Interface;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Ioc;
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Linq;
 
 namespace FlowChatApp.ViewModel
 {
@@ -24,7 +27,7 @@ namespace FlowChatApp.ViewModel
     public class ChatViewModel : ViewModelBase
     {
         ViewModelLocator ViewModelLocator { get; } = new ViewModelLocator();
-
+        IChatService ChatService => ViewModelLocator.ChatService;
         ViewModelBase _currentContentViewModel;
 
         public ViewModelBase CurrentContentViewModel
@@ -105,8 +108,69 @@ namespace FlowChatApp.ViewModel
             PropertyChanged += ChatViewModel_PropertyChanged;
 
             SendCommand = new RelayCommand(SendMessage, () => !string.IsNullOrEmpty(ContentToSend));
+            ShowAccountInfoCommand = new RelayCommand(ShowAccountInfo);
 
-            SetUpDesignData();
+            SetUpData();
+        }
+
+        PrivateChat GetPrivateChat(string username)
+        {
+            var chat = Chats
+                .OfType<PrivateChat>()
+                .FirstOrDefault(c => c.Contract.User.UserName == username);
+            if (chat == null)
+            {
+                var contract = Contracts.FirstOrDefault(c => c.User.UserName == username);
+                chat = new PrivateChat(contract);
+            }
+            return chat;
+        }
+
+        GroupChat GetGroupChat(long groupId)
+        {
+            var chat = Chats
+                .OfType<GroupChat>()
+                .FirstOrDefault(c => c.Group.Id == groupId);
+            if (chat == null)
+            {
+                var group = Groups.FirstOrDefault(g => g.Id == groupId);
+                chat = new GroupChat(group);
+            }
+            return chat;
+        }
+        async void SetUpData()
+        {
+            var result = await ChatService.GetAccountInfo();
+            CurrentAccount = result.Data;
+
+            var contracts = (await ChatService.GetContacts()).Data;
+            contracts.ForEach(c => Contracts.Add(c));
+
+            var groups = (await ChatService.GetGroups()).Data;
+            groups.ForEach(c => Groups.Add(c));
+
+            var chats = (await ChatService.GetChatHistory()).Data;
+            chats.ForEach(c => Chats.Add(c));
+
+            ChatService.ChatMessageReceived += (sender, message) =>
+            {
+                switch (message)
+                {
+                    case PrivateMessage m:
+                        {
+                            var peerName = m.Sender.UserName == CurrentAccount.UserName 
+                                ? m.Receiver.UserName
+                                : m.Sender.UserName;
+                            GetPrivateChat(peerName).AddMessage(m);
+                        }
+                        break;
+                    case GroupMessage m:
+                        {
+                            GetGroupChat(m.Group.Id).AddMessage(m);
+                        }
+                        break;
+                }
+            };
         }
 
         AccountInfoViewModel AccountInfoViewModel => ServiceLocator.Current.GetInstance<AccountInfoViewModel>();
@@ -118,7 +182,7 @@ namespace FlowChatApp.ViewModel
                     SendCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(CurrentAccount):
-                   AccountInfoViewModel.Account = CurrentAccount;
+                    AccountInfoViewModel.Account = CurrentAccount;
                     break;
             }
         }
@@ -135,132 +199,28 @@ namespace FlowChatApp.ViewModel
             {
                 case PrivateChat c:
                     {
-                        var message = new PrivateMessage("123", DateTime.Now, CurrentAccount, c.Peer, ContentToSend);
-                        c.Messages.Add(message);
+                        ChatService.SendMessage(c.Contract.User.UserName, ContentToSend);
                     }
                     break;
                 case GroupChat c:
                     {
-                        var message = new GroupMessage("123", DateTime.Now, CurrentAccount, c.Group, ContentToSend);
-                        c.Messages.Add(message);
+                        ChatService.SendGroupMessage(c.Group.Id, ContentToSend);
                     }
                     break;
             }
             ContentToSend = string.Empty;
         }
 
+        IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
 
-
-        void SetUpDesignData()
+        public RelayCommand ShowAccountInfoCommand { get; }
+        public void ShowAccountInfo()
         {
-            var userInfo = SimpleIoc.Default.GetInstance<UserInfoViewModel>();
-            var groupInfo = SimpleIoc.Default.GetInstance<GroupInfoViewModel>();
-
-            var user0 = new Account()
+            WindowService.ShowDialog(AccountInfoViewModel, p =>
             {
-                Id = 0,
-                Email = "jack@flowchat.com",
-                UserName = "jack",
-                NickName = "Jack",
-                Gender = Gender.Unknown,
-                Status = "Hello World!",
-            };
-
-            CurrentAccount = user0;
-
-            var user1 = new User()
-            {
-                Id = 1,
-                Email = "mei@flowchat.com",
-                UserName = "mei",
-                NickName = "Mei",
-                Gender = Gender.Girl,
-                Status = "Have Fun Coding!",
-                Phone = "1234567890",
-                Region = "China Guangzhou"
-            };
-
-            var user2 = new User()
-            {
-                Id = 2,
-                Email = "jimmy@flowchat.com",
-                UserName = "jimmy",
-                NickName = "jimmy",
-                Gender = Gender.Boy,
-                Status = "No Errors, No Bugs!"
-            };
-
-            var contract1 = new Contract(user1, "Han Mei");
-            var contract2 = new Contract(user2);
-
-            Contracts.Add(contract1);
-            Contracts.Add(contract2);
-
-            CurrentContract = contract1;
-
-            var group0 = new Group()
-            {
-                Name = "Group Zero",
-                Id = "00000",
-                Owner = user0
-            };
-
-            group0.Members.Add(user0);
-            group0.Members.Add(user1);
-            group0.Members.Add(user2);
-
-            var group1 = new Group()
-            {
-                Name = "Group One",
-                Id = "00001",
-                Owner = user1
-            };
-
-            group1.Members.Add(user0);
-            group1.Members.Add(user1);
-            group1.Members.Add(user2);
-
-            var group2 = new Group()
-            {
-                Name = "Group Two",
-                Id = "00002",
-                Owner = user2
-            };
-
-            group2.Members.Add(user0);
-            group2.Members.Add(user1);
-            group2.Members.Add(user2);
-
-            Groups.Add(group0);
-            Groups.Add(group1);
-            Groups.Add(group2);
-
-            CurrentGroup = group0;
-
-            var privateChat = new PrivateChat(user1);
-            Array.ForEach(new[]
-            {
-                new PrivateMessage("0", DateTime.Now, user0, user1, "Hello!"),
-                new PrivateMessage("1", DateTime.Now, user1, user0, "Hijack~"),
-            }, (e) => privateChat.Messages.Add(e));
-
-            var groupChat = new GroupChat(group0);
-            Array.ForEach(new[]
-            {
-                new GroupMessage("0", DateTime.Now, user0, group0, "Hello!"),
-                new GroupMessage("1", DateTime.Now, user1, group0, "Hey!~"),
-            }, (e) => groupChat.Messages.Add(e));
-
-            Chats.Add(privateChat);
-            Chats.Add(groupChat);
-
-            CurrentChat = privateChat;
-
-            ContentToSend = "Haha~";
 
 
-            userInfo.Contract = CurrentContract;
-            groupInfo.Group = CurrentGroup;
+            });
         }
     }
 }

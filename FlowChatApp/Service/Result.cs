@@ -45,5 +45,6 @@ namespace FlowChatApp.Service
 
         public static Result BadRequest = new Result(ResultCode.Bad, "BadRequest", null);
 
+        public static Result OKRequest = new Result(ResultCode.Ok, "OK", null);
     }
 }

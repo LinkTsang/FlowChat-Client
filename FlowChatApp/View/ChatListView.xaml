@@ -15,7 +15,7 @@
                     <ColumnDefinition Width="60"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Image Grid.Column="0" Margin="2" Width="50" Height="50" Stretch="UniformToFill" Source="{Binding Peer.Avatar}"></Image>
+                <Image Grid.Column="0" Margin="2" Width="50" Height="50" Stretch="UniformToFill" Source="{Binding Contract.User.Avatar}"></Image>
                 <StackPanel Grid.Column="1" Margin="2">
                     <TextBlock Margin="2" Text="{Binding PeerName}" />
                     <TextBlock Margin="2" Text="{Binding RecentMessage.Content}" Foreground="Gray" />

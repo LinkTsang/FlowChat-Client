@@ -26,9 +26,9 @@ namespace FlowChatApp.ViewModel
 
         ISignInView SignInView => ServiceLocator.Current.GetInstance<ISignInView>();
         IChatService ChatService => ServiceLocator.Current.GetInstance<IChatService>();
-
         IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
 
+        ChatViewModel ChatViewModel => ServiceLocator.Current.GetInstance<ChatViewModel>();
         public Account Account { get; } = new Account();
 
         bool _isLogging;
@@ -42,17 +42,22 @@ namespace FlowChatApp.ViewModel
             }
         }
 
-        string _email;
-        public string Email
+        string _username;
+        public string Username
         {
-            get => _email;
-            set => Set(() => Email, ref _email, value);
+            get => _username;
+            set => Set(() => Username, ref _username, value);
         }
 
         public SignInViewModel()
         {
+            SetUpDesignData();
         }
 
+        void SetUpDesignData()
+        {
+            Username = "test0";
+        }
         ICommand _signInCommand;
         public ICommand SignInCommand =>
             _signInCommand ?? (_signInCommand = new RelayCommand(async () => await OnSignIn(), () => !_isLogging));
@@ -61,16 +66,16 @@ namespace FlowChatApp.ViewModel
         {
             var password = SignInView.GetPassword();
             IsLogging = true;
-            var response = await ChatService.SignInAsync(Email, password);
-            if (response.Ok)
-            {
-                Messenger.Default.Send(new NotificationMessage("LoginSuccessfully"));
-            }
-            else
+            var response = await ChatService.SignInAsync(Username, password);
+            if (response.HasError)
             {
                 WindowService.ShowMessage("Flow Chat", response.Message);
+                IsLogging = false;
+                return;
             }
+            ChatViewModel.CurrentAccount = (await ChatService.GetAccountInfo()).Data;
             IsLogging = false;
+            Messenger.Default.Send(new NotificationMessage("LoginSuccessfully"));
         }
 
         ICommand _signUpCommand;

@@ -1,4 +1,6 @@
 ﻿using FlowChatApp.Service.Interface;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +12,33 @@ namespace FlowChatApp.Service
 {
     public class WindowService : IWindowService
     {
-        public string OpenFile(string caption, string filter = "All files (*.*)|*.*")
+        public string OpenFile(string caption, string filter = "Image files (*.png;*.jpeg)|*.png;*.jpeg|All files (*.*)|*.*")
         {
-            throw new NotImplementedException();
+            var openFileDialog = new OpenFileDialog()
+            {
+                Filter = filter,
+                Title = caption
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                return openFileDialog.FileName;
+            }
+            return null;
         }
 
         public void ShowMessage(string title, string message)
         {
             MessageBox.Show(message, title);
         }
+
+        public void ShowDialog(object content, Action<object> closeingAction)
+        {
+            DialogHost.Show(content, (sender, args) =>
+            {
+                closeingAction?.Invoke(args.Parameter);
+            });
+        }
+
+
     }
 }

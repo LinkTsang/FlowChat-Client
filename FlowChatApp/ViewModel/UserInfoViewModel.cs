@@ -36,14 +36,14 @@ namespace FlowChatApp.ViewModel
 
         void ChatWithContract()
         {
-            var currentUser = Contract.User;
+            var curentContract = Contract;
             var chat = ServiceLocator.Current.GetInstance<ChatViewModel>();
             var result = chat.Chats
                 .OfType<PrivateChat>()
-                .FirstOrDefault(c => c.Peer.UserName == currentUser.UserName);
+                .FirstOrDefault(c => c.Contract.User.UserName == curentContract.User.UserName);
             if(result == null)
             {
-                var c = new PrivateChat(currentUser);
+                var c = new PrivateChat(curentContract);
                 chat.Chats.Add(c);
                 result = c;
             }

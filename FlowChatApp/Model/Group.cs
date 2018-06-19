@@ -16,9 +16,15 @@ namespace FlowChatApp.Model
 
         }
 
+        public Group(long id, string name, User owner)
+        {
+            _id = id;
+            _name = name;
+            _owner = owner;
+        }
 
-        string _id = string.Empty;
-        public string Id
+        long _id = 0;
+        public long Id
         {
             get => _id;
             set => Set(ref _id, value);

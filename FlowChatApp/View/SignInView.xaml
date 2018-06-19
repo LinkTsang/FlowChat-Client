@@ -46,9 +46,9 @@
                 </Grid.ColumnDefinitions>
                 <Label Grid.Row="0" Grid.Column="0"
                        HorizontalAlignment="Left" VerticalAlignment="Center"
-                       Content="Email: "/>
+                       Content="Username: "/>
                 <TextBox Grid.Row="0" Grid.Column="1"
-                         Text="{Binding Email}"
+                         Text="{Binding Username}"
                          HorizontalAlignment="Left"
                          VerticalAlignment="Center"
                          Width="150"/>

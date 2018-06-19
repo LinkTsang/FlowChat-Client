@@ -37,10 +37,8 @@
         <Grid>
             <Button 
                 Style="{DynamicResource MaterialDesignFloatingActionMiniAccentButton}"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
                 Command="{Binding ChatWithGroupCommand}"
-                Margin="0,-30,10,170">
+                Margin="0,-30,10,0" Height="40" Width="40" VerticalAlignment="Top" HorizontalAlignment="Right">
                 <materialDesign:PackIcon Kind="MessageProcessing"/>
             </Button>
             <ListView ItemsSource="{Binding Group.Members}">

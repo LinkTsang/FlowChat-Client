@@ -43,6 +43,19 @@ namespace FlowChatApp.Model
             _headUrl = headUrl;
         }
 
+        public void MergeFrom(User user)
+        {
+            Id = user.Id;
+            Email = user.Email;
+            UserName = user.UserName;
+            NickName = user.NickName;
+            Region = user.Region;
+            Phone = user.Phone;
+            Status = user.Status;
+            Gender = user.Gender;
+            HeadUrl = user.HeadUrl;
+        }
+
         long _id = 0;
         public long Id
         {

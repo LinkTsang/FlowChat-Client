@@ -14,6 +14,11 @@ namespace FlowChatApp.Model
             Online,
             Offline
         }
+
+        public Contract()
+        {
+
+        }
         public Contract(User user)
         {
             _user = user;
@@ -54,15 +59,15 @@ namespace FlowChatApp.Model
 
         }
 
-        public ContractInvation(string recordId, string friendName, string message)
+        public ContractInvation(long recordId, string friendName, string message)
         {
             _recordId = recordId;
             _friendName = friendName;
             _message = message;
         }
 
-        string _recordId = string.Empty;
-        public string RecordId
+        long _recordId;
+        public long RecordId
         {
             get => _recordId;
             set => Set(ref _recordId, value);

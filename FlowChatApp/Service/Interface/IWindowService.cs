@@ -10,6 +10,8 @@ namespace FlowChatApp.Service.Interface
     {
         void ShowMessage(string title, string message);
 
+        string OpenFile(string caption, string filter = "Image files (*.png;*.jpeg)|*.png;*.jpeg|All files (*.*)|*.*");
 
+        void ShowDialog(object content, Action<object> closeingAction);
     }
 }

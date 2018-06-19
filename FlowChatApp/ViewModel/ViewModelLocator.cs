@@ -45,11 +45,19 @@ namespace FlowChatApp.ViewModel
             SimpleIoc.Default.Register<GroupInfoViewModel>();
 
             SimpleIoc.Default.Register<ChatViewModel>();
+
         }
 
         static ViewModelLocator()
         {
-            SimpleIoc.Default.Register<IChatService>(() => new ChatService("http://127.0.0.1:8081/"));
+            if (ViewModelBase.IsInDesignModeStatic || App.IsInDemoMode)
+            {
+                SimpleIoc.Default.Register<IChatService>(() => new DemoChatService());
+            }
+            else
+            {
+                SimpleIoc.Default.Register<IChatService>(() => new ChatService("http://127.0.0.1:8081/"));
+            }
             SimpleIoc.Default.Register<IWindowService, WindowService>();
         }
         public LoginViewModel Login
@@ -89,6 +97,11 @@ namespace FlowChatApp.ViewModel
         public IChatService ChatService
         {
             get => ServiceLocator.Current.GetInstance<IChatService>();
+        }
+
+        public IWindowService WindowService
+        {
+            get => ServiceLocator.Current.GetInstance<IWindowService>();
         }
 
         public static void Cleanup()

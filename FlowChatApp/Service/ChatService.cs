@@ -77,50 +77,12 @@ namespace FlowChatApp.Service
 
         }
 
-
-        async Task<Result> PostRequestAsync(string requestUri)
+        async Task<Result> PostRequestImplAsync(string requestUri, JObject jObject)
         {
-            var content = new StringContent(string.Empty, Encoding.UTF8);
+            var content = new StringContent(jObject == null ? string.Empty : jObject.ToString(), Encoding.UTF8);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             content.Headers.Add("token", _token);
-            var response = await _httpClient.PostAsync(requestUri, content, _cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Trace.WriteLine(responseContent);
-            }
-            else if (response.Content.Headers.ContentType.MediaType == "application/json")
-            {
-                var s = await response.Content.ReadAsStringAsync();
-                var result = JObject.Parse(s);
-                var code = result["code"].Value<int>();
-                var message = result["msg"].Value<string>();
-                var data = result["data"];
-                return new Result((ResultCode)code, message, data);
-            }
-            return Result.BadRequest;
-        }
-
-        async Task<Result<T>> PostRequestAsync<T>(string requestUri) where T : class
-        {
-            var response = await PostRequestAsync(requestUri);
-            if (response == null)
-            {
-                return null;
-            }
-            var result = new Result<T>(response.Code, response.Message);
-            if (response.Data != null)
-            {
-                result.Data = response.Data.ToObject<T>();
-            }
-            return result;
-        }
-
-        async Task<Result> PostRequestAsync(string requestUri, JObject jObject)
-        {
-            var content = new StringContent(jObject.ToString(), Encoding.UTF8);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            content.Headers.Add("token", _token);
+            Result result = Result.BadRequest;
             try
             {
                 var response = await _httpClient.PostAsync(requestUri, content, _cancellationToken);
@@ -132,28 +94,36 @@ namespace FlowChatApp.Service
                 else if (response.Content.Headers.ContentType.MediaType == "application/json")
                 {
                     var s = await response.Content.ReadAsStringAsync();
-                    var result = JObject.Parse(s);
-                    var code = result["code"].Value<int>();
-                    var message = result["msg"].Value<string>();
-                    var data = result["data"];
-                    return new Result((ResultCode)code, message, data);
+                    var r = JObject.Parse(s);
+                    var code = r["code"].Value<int>();
+                    var message = r["msg"].Value<string>();
+                    var data = r["data"];
+                    result = new Result((ResultCode)code, message, data);
                 }
             }
             catch (HttpRequestException e)
             {
                 Trace.WriteLine(e.Message);
-                return new Result(ResultCode.Bad, e.Message, null);
+                result = new Result(ResultCode.Bad, e.Message, null);
             }
-
-            return Result.BadRequest;
+            return result;
+        }
+        async Task<Result> PostRequestAsync(string requestUri, JObject jObject = null)
+        {
+            var result = await PostRequestImplAsync(requestUri, jObject);
+            if (result.HasError)
+            {
+                BadRequestRaised?.Invoke(this, result);
+            }
+            return result;
         }
 
-        async Task<Result<T>> PostRequestAsync<T>(string requestUri, JObject jObject) where T : class
+        async Task<Result<T>> PostRequestAsync<T>(string requestUri, JObject jObject = null) where T : class
         {
-            var response = await PostRequestAsync(requestUri, jObject);
-            if (response == null)
+            var response = await PostRequestImplAsync(requestUri, jObject);
+            if (response.HasError)
             {
-                return null;
+                BadRequestRaised?.Invoke(this, response);
             }
             var result = new Result<T>(response.Code, response.Message);
             if (response.Data != null)
@@ -165,6 +135,7 @@ namespace FlowChatApp.Service
 
         public event EventHandler<ChatMessage> ChatMessageReceived;
         public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
+        public event EventHandler<Result> BadRequestRaised;
 
         #region sign service
         public async Task<Result<TokenClass>> SignInAsync(string username, string password)
@@ -205,14 +176,14 @@ namespace FlowChatApp.Service
         #region account service
 
 
-        public async Task<Result<User>> GetAccountInfo()
+        public async Task<Result<Account>> GetAccountInfo()
         {
-            return await PostRequestAsync<User>("/api/auth/searchUserInfo");
+            return await PostRequestAsync<Account>("/api/auth/searchUserInfo");
         }
 
-        public async Task<Result<User>> UpdateUserInfo(User user)
+        public async Task<Result<Account>> UpdateAccountInfo(Account account)
         {
-            return await PostRequestAsync<User>("/api/auth/modifyUserInfo", JObject.FromObject(user));
+            return await PostRequestAsync<Account>("/api/auth/modifyUserInfo", JObject.FromObject(account));
         }
 
         public async Task<Result> UploadAvator(string filename, byte[] avator)
@@ -285,7 +256,7 @@ namespace FlowChatApp.Service
         #endregion
 
 
-        public async Task<Result<User>> SearchUser(SearchType type, string value)
+        public async Task<Result<List<User>>> SearchUser(SearchType type, string value)
         {
             throw new NotImplementedException();
         }
@@ -317,7 +288,7 @@ namespace FlowChatApp.Service
                 {
                     return Result<List<Contract>>.ErrorMessage("Error");
                 }
-                foreach(var member in categoryMemberInfos)
+                foreach (var member in categoryMemberInfos)
                 {
                     var user = member.ToObject<User>();
                     var contract = new Contract(user, "", catetoryName);
@@ -358,13 +329,13 @@ namespace FlowChatApp.Service
             return await PostRequestAsync<List<ContractInvation>>("/api/auth/confirmcontactinvation", jObject);
         }
 
-        public async Task<Result> DeleteContact(string id)
+        public async Task<Result> DeleteContact(long id)
         {
             var jObject = new JObject()
             {
                 ["memberId"] = id,
             };
-            return await PostRequestAsync("/api/auth/confirmcontactinvation", jObject);
+            return await PostRequestAsync("/api/auth/deleteFriend", jObject);
         }
 
         public Task<Result<List<string>>> GetBlocked()
@@ -448,12 +419,12 @@ namespace FlowChatApp.Service
                 {
                     return Result<List<Group>>.ErrorMessage("Error");
                 }
-                var g = new Group {Name = c["groupName"].Value<string>()};
+                var g = new Group { Name = c["groupName"].Value<string>() };
                 if (!(c["groupMemberInfos"] is JArray groupMemberInfos))
                 {
                     return Result<List<Group>>.ErrorMessage("Error");
                 }
-                foreach(var member in groupMemberInfos)
+                foreach (var member in groupMemberInfos)
                 {
                     var user = member.ToObject<User>();
                     g.Members.Add(user);
@@ -463,7 +434,7 @@ namespace FlowChatApp.Service
             return new Result<List<Group>>(ResultCode.Ok, "OK", list);
         }
 
-        public async Task<Result<List<Group>>> SearchAllGroup()
+        public async Task<Result<List<Group>>> GetGroups()
         {
             var result = await PostRequestAsync("/api/auth/searchGroup");
             if (result.HasError)
@@ -483,12 +454,12 @@ namespace FlowChatApp.Service
                 {
                     return Result<List<Group>>.ErrorMessage("Error");
                 }
-                var g = new Group {Name = c["groupName"].Value<string>()};
+                var g = new Group { Name = c["groupName"].Value<string>() };
                 if (!(c["groupMemberInfos"] is JArray groupMemberInfos))
                 {
                     return Result<List<Group>>.ErrorMessage("Error");
                 }
-                foreach(var member in groupMemberInfos)
+                foreach (var member in groupMemberInfos)
                 {
                     var user = member.ToObject<User>();
                     g.Members.Add(user);
@@ -499,17 +470,27 @@ namespace FlowChatApp.Service
         }
         #endregion
 
-        public Task<Result> SendMessage(string userId, string content)
+        public Task<Result> SendMessage(string username, string content)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result> SendGroupMessage(string groupId, string content)
+        public Task<Result> SendGroupMessage(long groupId, string content)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<List<ChatMessage>>> GetChatHistory()
+        public Task<Result<List<PrivateChat>>> GetPrivateChatHistory()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<List<GroupChat>>> GetGroupChatHistory()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<List<Chat>>> GetChatHistory()
         {
             throw new NotImplementedException();
         }

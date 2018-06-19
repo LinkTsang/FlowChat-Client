@@ -15,7 +15,9 @@ namespace FlowChatApp
     {
         public App()
         {
-            
+            IsInDemoMode = true;
         }
+
+        public static bool IsInDemoMode { get; private set; }
     }
 }

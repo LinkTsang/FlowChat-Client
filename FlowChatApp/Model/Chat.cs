@@ -1,6 +1,7 @@
 ﻿using FlowChatApp.ViewModel;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,15 +13,19 @@ namespace FlowChatApp.Model
 {
     public class ChatMessage : ObservableObject
     {
-        public ChatMessage(string id, DateTime time, User sender, string content)
+        public ChatMessage()
+        {
+
+        }
+        public ChatMessage(long id, DateTime time, User sender, string content)
         {
             _id = id;
             _time = time;
             _sender = sender;
             _content = content;
         }
-        string _id;
-        public string Id
+        long _id;
+        public long Id
         {
             get => _id;
             set => Set(ref _id, value);
@@ -55,6 +60,7 @@ namespace FlowChatApp.Model
             set => Set(ref _read, value);
         }
 
+        [JsonIgnore]
         public bool IsCurrentAccount
         {
             get
@@ -66,7 +72,11 @@ namespace FlowChatApp.Model
     }
     public class PrivateMessage : ChatMessage
     {
-        public PrivateMessage(string id, DateTime time, User sender, User receiver, string content)
+        public PrivateMessage()
+        {
+
+        }
+        public PrivateMessage(long id, DateTime time, User sender, User receiver, string content)
             : base(id, time, sender, content)
         {
             _receiver = receiver;
@@ -82,7 +92,11 @@ namespace FlowChatApp.Model
 
     public class GroupMessage : ChatMessage
     {
-        public GroupMessage(string id, DateTime time, User sender, Group group, string content)
+        public GroupMessage()
+        {
+
+        }
+        public GroupMessage(long id, DateTime time, User sender, Group group, string content)
             : base(id, time, sender, content)
         {
             _group = group;
@@ -114,20 +128,25 @@ namespace FlowChatApp.Model
     public class PrivateChat : Chat
     {
 
-        User _user;
-        public User Peer
+        Contract _contract;
+        public Contract Contract
         {
-            get => _user;
-            set => Set(ref _user, value);
+            get => _contract;
+            set => Set(ref _contract, value);
         }
+
         public override string PeerName
         {
-            get => Peer.NickName;
+            get => Contract.User.NickName;
         }
-        public PrivateChat(User user)
+        public PrivateChat()
         {
-            Peer = user;
-            Peer.PropertyChanged += (sender, e) => RaisePropertyChanged(nameof(PeerName));
+        }
+
+        public PrivateChat(Contract contract) : this()
+        {
+            Contract = contract;
+            Contract.PropertyChanged += (sender, e) => RaisePropertyChanged(nameof(PeerName));
         }
 
         public ObservableCollection<PrivateMessage> Messages { get; } = new ObservableCollection<PrivateMessage>();
@@ -167,7 +186,10 @@ namespace FlowChatApp.Model
             get => Group.Name;
         }
 
-        public GroupChat(Group group)
+        public GroupChat()
+        {
+        }
+        public GroupChat(Group group) : this()
         {
             Group = group;
             Group.PropertyChanged += (sender, e) => RaisePropertyChanged(nameof(PeerName));

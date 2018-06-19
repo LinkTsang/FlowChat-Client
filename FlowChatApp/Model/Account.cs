@@ -12,10 +12,15 @@ namespace FlowChatApp.Model
     {
         public Account()
         {
+
+        }
+        public Account(User user)
+            : this(user.Id, user.Email, user.UserName, user.NickName, user.Region, user.Phone, user.Status, user.Gender, user.HeadUrl)
+        {
         }
         public Account(long id, string email, string username, string nickname,
             string region, string phone, string status, Gender gender, string headUrl)
-            : base(id,  email,  username,  nickname, region,  phone,  status,  gender,  headUrl)
+            : base(id, email, username, nickname, region, phone, status, gender, headUrl)
         {
         }
 
@@ -26,6 +31,12 @@ namespace FlowChatApp.Model
         {
             get => _password;
             set => Set(ref _password, value);
+        }
+
+        internal void MergeFrom(Account account)
+        {
+            Password = account.Password;
+            base.MergeFrom(account);
         }
     }
 }

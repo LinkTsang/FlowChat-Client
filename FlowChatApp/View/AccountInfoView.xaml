@@ -16,7 +16,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Button Width="200" Height="200" Background="{x:Null}" BorderThickness="0">
+            <Button Width="200" Height="200" Background="{x:Null}" BorderThickness="0" Command="{Binding UploadAvatorCommand}">
                 <Image Source="{Binding Account.Avatar}" Stretch="UniformToFill" HorizontalAlignment="Center"/>
             </Button>
             <StackPanel Grid.Row="1" Margin="10,20,10,5">

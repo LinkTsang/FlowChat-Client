@@ -22,7 +22,9 @@
         <DataTemplate DataType="{x:Type vm:GroupInfoViewModel}">
             <local:GroupInfoView />
         </DataTemplate>
-
+        <DataTemplate DataType="{x:Type vm:AccountInfoViewModel}">
+            <local:AccountInfoView/>
+        </DataTemplate>
         <Style TargetType="TabItem">
             <Setter Property="Template">
                 <Setter.Value>
@@ -49,7 +51,7 @@
     </Window.Resources>
     <md:DialogHost>
         <md:DialogHost.DialogContent>
-            <local:AccountInfoView/>
+            <ContentControl Content="{Binding}"/>
         </md:DialogHost.DialogContent>
         <md:DrawerHost HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
@@ -58,7 +60,7 @@
                    IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
             <md:DrawerHost.LeftDrawerContent>
                 <StackPanel Margin="16" Width="200" HorizontalAlignment="Center">
-                    <Button Width="100" Height="100" Padding="0" Margin="10" Command="{x:Static md:DialogHost.OpenDialogCommand}">
+                    <Button Width="100" Height="100" Padding="0" Margin="10" Command="{Binding ShowAccountInfoCommand}">
                         <Image Width="100" Height="100" Source="{Binding CurrentAccount.Avatar}" Cursor="Hand"/>
                     </Button>
                     <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,10">
