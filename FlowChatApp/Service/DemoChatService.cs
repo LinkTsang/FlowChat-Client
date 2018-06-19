@@ -208,7 +208,11 @@ namespace FlowChatApp.Service
             var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
             return result;
         }
-
+        public async Task<Result> JoinGroup(long groupId)
+        {
+            var result = new Result(ResultCode.Ok, "OK", null);
+            return result;
+        }
         public async Task<Result<List<User>>> SearchUser(SearchType type, string value)
         {
             var result = new Result<List<User>>(ResultCode.Ok, "OK", Users);
@@ -434,6 +438,5 @@ namespace FlowChatApp.Service
                 new ContractInvation(GenContractInvationId(), Users[3].UserName, "HeyHey!")
             });
         }
-
     }
 }

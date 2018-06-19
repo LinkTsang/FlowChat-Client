@@ -25,6 +25,12 @@
         <DataTemplate DataType="{x:Type vm:AccountInfoViewModel}">
             <local:AccountInfoView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AddGroupViewModel}">
+            <local:AddGroupView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AddContractViewModel}">
+            <local:AddContractView/>
+        </DataTemplate>
         <Style TargetType="TabItem">
             <Setter Property="Template">
                 <Setter.Value>
@@ -49,7 +55,7 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <md:DialogHost>
+    <md:DialogHost CloseOnClickAway="True">
         <md:DialogHost.DialogContent>
             <ContentControl Content="{Binding}"/>
         </md:DialogHost.DialogContent>
@@ -102,13 +108,12 @@
                         Kind="Magnify"
                         Opacity=".56" />
                         </Button>
-                        <TextBox
-                    Grid.Column="1"
-                    Margin="8 0 8 0"
-                    md:HintAssist.Hint="Search"
-                    md:TextFieldAssist.DecorationVisibility="Hidden"
-                    BorderThickness="0"
-                    VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1"
+                                 Margin="8 0 8 0"
+                                 md:HintAssist.Hint="Search"
+                                 md:TextFieldAssist.DecorationVisibility="Hidden"
+                                 BorderThickness="0"
+                                 VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>
                 <Border Grid.Row="0" Grid.Column="1"

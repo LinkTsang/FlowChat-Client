@@ -110,6 +110,8 @@ namespace FlowChatApp.ViewModel
             SendCommand = new RelayCommand(SendMessage, () => !string.IsNullOrEmpty(ContentToSend));
             ShowAccountInfoCommand = new RelayCommand(ShowAccountInfo);
 
+            AddContractCommand = new RelayCommand(AddContract);
+            AddGroupCommand = new RelayCommand(AddGroup);
             SetUpData();
         }
 
@@ -158,7 +160,7 @@ namespace FlowChatApp.ViewModel
                 {
                     case PrivateMessage m:
                         {
-                            var peerName = m.Sender.UserName == CurrentAccount.UserName 
+                            var peerName = m.Sender.UserName == CurrentAccount.UserName
                                 ? m.Receiver.UserName
                                 : m.Sender.UserName;
                             GetPrivateChat(peerName).AddMessage(m);
@@ -211,8 +213,29 @@ namespace FlowChatApp.ViewModel
             ContentToSend = string.Empty;
         }
 
-        IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
+        public RelayCommand AddContractCommand { get; }
+        AddContractViewModel AddContractViewModel => ServiceLocator.Current.GetInstance<AddContractViewModel>();
 
+        void AddContract()
+        {
+            WindowService.ShowDialog(AddContractViewModel, p =>
+            {
+
+
+            });
+        }
+        public RelayCommand AddGroupCommand { get; }
+        AddGroupViewModel AddGroupViewModel => ServiceLocator.Current.GetInstance<AddGroupViewModel>();
+
+        void AddGroup()
+        {
+            WindowService.ShowDialog(AddGroupViewModel, p =>
+            {
+
+
+            });
+        }
+        IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
         public RelayCommand ShowAccountInfoCommand { get; }
         public void ShowAccountInfo()
         {

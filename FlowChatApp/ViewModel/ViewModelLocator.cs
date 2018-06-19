@@ -45,6 +45,8 @@ namespace FlowChatApp.ViewModel
             SimpleIoc.Default.Register<GroupInfoViewModel>();
 
             SimpleIoc.Default.Register<ChatViewModel>();
+            SimpleIoc.Default.Register<AddContractViewModel>();
+            SimpleIoc.Default.Register<AddGroupViewModel>();
 
         }
 
@@ -93,6 +95,14 @@ namespace FlowChatApp.ViewModel
         public ChatViewModel Chat
         {
             get => ServiceLocator.Current.GetInstance<ChatViewModel>();
+        }
+        public AddGroupViewModel AddGroup
+        {
+            get => ServiceLocator.Current.GetInstance<AddGroupViewModel>();
+        }
+        public AddContractViewModel AddContract
+        {
+            get => ServiceLocator.Current.GetInstance<AddContractViewModel>();
         }
         public IChatService ChatService
         {

@@ -494,5 +494,10 @@ namespace FlowChatApp.Service
         {
             throw new NotImplementedException();
         }
+
+        public Task<Result> JoinGroup(long groupId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

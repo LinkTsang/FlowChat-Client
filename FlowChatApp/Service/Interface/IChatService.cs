@@ -22,6 +22,7 @@ namespace FlowChatApp.Service.Interface
 
         Task<Result> AddContact(string username, string categoryName, string message);
         Task<Result> AddGroup(string groupName);
+        Task<Result> JoinGroup(long groupId);
         Task<Result> AddGroupMember(string groupName, string userName);
         Task<Result> BlockContact(string id);
         Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName);
