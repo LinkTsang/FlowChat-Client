@@ -86,4 +86,33 @@ namespace FlowChatApp.Model
         }
 
     }
+
+    public class InvationConfirmation : ViewModelBase
+    {
+        public InvationConfirmation()
+        {
+
+        }
+
+        long _recordId;
+        public long RecordId
+        {
+            get => _recordId;
+            set => Set(ref _recordId, value);
+        }
+
+        string _friendName = string.Empty;
+        public string FriendName
+        {
+            get => _friendName;
+            set => Set(ref _friendName, value);
+        }
+
+        bool _accpeted;
+        public bool Accepted
+        {
+            get => _accpeted;
+            set => Set(ref _accpeted, value);
+        }
+    }
 }

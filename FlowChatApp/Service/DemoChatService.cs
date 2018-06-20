@@ -36,8 +36,59 @@ namespace FlowChatApp.Service
 
         public event EventHandler<ChatMessage> ChatMessageReceived;
         public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
+        public event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
         public event EventHandler<Result> BadRequestRaised;
 
+        #region account
+        public async Task<Result> SignUpAsync(string email, string username, string nickname, string password)
+        {
+            var result = Result.BadRequest;
+            return result;
+        }
+
+        public async Task<Result<ChatService.TokenClass>> SignInAsync(string username, string password)
+        {
+            var result = new Result<ChatService.TokenClass>(ResultCode.Ok, "OK", new ChatService.TokenClass());
+            return result;
+        }
+
+        public async Task<Result> SignOutAsync()
+        {
+            var result = new Result(ResultCode.Ok, "OK", null);
+            return result;
+        }
+        public Task<Result<ChatService.TokenClass>> UpdateToken()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Result<Account>> UpdateAccountInfo(Account account)
+        {
+            CurrentAccount.MergeFrom(account);
+            var result = new Result<Account>(ResultCode.Ok, "OK", CurrentAccount);
+            return result;
+        }
+
+        public async Task<Result<Account>> GetAccountInfo()
+        {
+            Result<Account> result = new Result<Account>(ResultCode.Ok, "OK", CurrentAccount);
+            return result;
+        }
+
+        public async Task<Result> UploadAvator(string filename, byte[] avator)
+        {
+            var result = Result.BadRequest;
+            return result;
+        }
+
+        #endregion
+
+        #region contract
+        public async Task<Result<List<Contract>>> GetContacts()
+        {
+            var result = new Result<List<Contract>>(ResultCode.Ok, "OK", Contracts);
+            return result;
+        }
         public async Task<Result> AddContact(string username, string categoryName, string message)
         {
             var result = Result.BadRequest;
@@ -51,8 +102,73 @@ namespace FlowChatApp.Service
             }
             return result;
         }
+        public async Task<Result> DeleteContact(long id)
+        {
+            var result = Result.BadRequest;
+            var contract = Contracts.FirstOrDefault(c => c.User.Id == id);
+            if (contract != null)
+            {
+                Contracts.Remove(contract);
+                result = Result.OKRequest;
+            }
+            return result;
+        }
+        public async Task<Result<List<Contract>>> UpdateContact(string username, string alias, string categroy)
+        {
+            var result = new Result<List<Contract>>(ResultCode.Ok, "OK", Contracts);
+            return result;
+        }
 
-        public async Task<Result> AddGroup(string groupName)
+        public async Task<Result<List<ContractInvation>>> GetContractInvations()
+        {
+            var result = new Result<List<ContractInvation>>(ResultCode.Ok, "OK", contractInvations);
+            return result;
+        }
+        public async Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName, bool accept)
+        {
+            return null;
+        }
+        public Task<Result<List<InvationConfirmation>>> GetInvationConfirmations()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region user
+        public async Task<Result<User>> GetUserInfo(string username)
+        {
+            var result = new Result<User>(ResultCode.Ok, "OK", Users[1]);
+            return result;
+        }
+
+        public async Task<Result<List<User>>> SearchUser(SearchType type, string value)
+        {
+            var result = new Result<List<User>>(ResultCode.Ok, "OK", Users);
+            return result;
+        }
+
+        public async Task<Result<byte[]>> GetAvator(string url)
+        {
+            var result = new Result<byte[]>(ResultCode.Ok, "OK");
+            return result;
+        }
+        #endregion
+
+        #region group
+
+        public async Task<Result<List<Group>>> GetGroups()
+        {
+            var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
+            return result;
+        }
+        public async Task<Result> JoinGroup(long groupId)
+        {
+            var result = new Result(ResultCode.Ok, "OK", null);
+            return result;
+        }
+
+        public async Task<Result> CreateGroup(string groupName)
         {
             var result = Result.BadRequest;
             if (Groups.FirstOrDefault(g => g.Name == groupName) != null)
@@ -60,6 +176,23 @@ namespace FlowChatApp.Service
                 Groups.Add(new Group(GenGroupId(), groupName, CurrentAccount));
                 result = Result.OKRequest;
             }
+            return result;
+        }
+        public async Task<Result> LeaveGroup(string groupName)
+        {
+            var result = Result.BadRequest;
+            var group = JoinedGroups.FirstOrDefault(g => g.Name == groupName);
+            if (group != null)
+            {
+                JoinedGroups.Remove(group);
+                result = Result.OKRequest;
+            }
+            return result;
+        }
+
+        public async Task<Result<List<Group>>> SearchGroup(string groupName)
+        {
+            var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
             return result;
         }
 
@@ -79,34 +212,6 @@ namespace FlowChatApp.Service
             return result;
         }
 
-        public async Task<Result> BlockContact(string id)
-        {
-            var result = Result.BadRequest;
-            return result;
-        }
-
-        public Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName)
-        {
-            return null;
-        }
-
-        public void Connect(IPAddress ipAddress, int port)
-        {
-            return;
-        }
-
-        public async Task<Result> DeleteContact(long id)
-        {
-            var result = Result.BadRequest;
-            var contract = Contracts.FirstOrDefault(c => c.User.Id == id);
-            if (contract != null)
-            {
-                Contracts.Remove(contract);
-                result = Result.OKRequest;
-            }
-            return result;
-        }
-
         public async Task<Result> DeleteGroup(string groupName)
         {
             var result = Result.BadRequest;
@@ -116,72 +221,6 @@ namespace FlowChatApp.Service
                 Groups.Remove(groups);
                 result = Result.OKRequest;
             }
-            return result;
-        }
-
-        public async Task<Result<Account>> GetAccountInfo()
-        {
-            Result<Account> result = new Result<Account>(ResultCode.Ok, "OK", CurrentAccount);
-            return result;
-        }
-
-        public async Task<Result<byte[]>> GetAvator()
-        {
-            var result = new Result<byte[]>(ResultCode.Ok, "OK");
-            return result;
-        }
-
-        public async Task<Result<List<string>>> GetBlocked()
-        {
-            var result = new Result<List<string>>(ResultCode.Ok, "OK");
-            return result;
-        }
-
-        public async Task<Result<List<PrivateChat>>> GetPrivateChatHistory()
-        {
-            string json = JsonConvert.SerializeObject(Chats.OfType<PrivateChat>());
-            var chats = JsonConvert.DeserializeObject<List<PrivateChat>>(json);
-            var result = new Result<List<PrivateChat>>(ResultCode.Ok, "OK", chats);
-            return result;
-        }
-
-        public async Task<Result<List<GroupChat>>> GetGroupChatHistory()
-        {
-            string json = JsonConvert.SerializeObject(Chats.OfType<GroupChat>());
-            var chats = JsonConvert.DeserializeObject<List<GroupChat>>(json);
-            var result = new Result<List<GroupChat>>(ResultCode.Ok, "OK", chats);
-            return result;
-        }
-        public async Task<Result<List<Chat>>> GetChatHistory()
-        {
-            var chats = new List<Chat>();
-
-            string json = JsonConvert.SerializeObject(Chats.OfType<PrivateChat>());
-            var privateChats = JsonConvert.DeserializeObject<List<PrivateChat>>(json);
-            chats.AddRange(privateChats);
-
-            json = JsonConvert.SerializeObject(Chats.OfType<GroupChat>());
-            var groupChats = JsonConvert.DeserializeObject<List<GroupChat>>(json);
-            chats.AddRange(groupChats);
-
-            var result = new Result<List<Chat>>(ResultCode.Ok, "OK", chats);
-            return result;
-        }
-        public async Task<Result<List<Contract>>> GetContacts()
-        {
-            var result = new Result<List<Contract>>(ResultCode.Ok, "OK", Contracts);
-            return result;
-        }
-
-        public async Task<Result> GetContactStatus(params string[] ids)
-        {
-            var result = Result.BadRequest;
-            return result;
-        }
-
-        public async Task<Result<List<ContractInvation>>> GetContractInvation()
-        {
-            var result = new Result<List<ContractInvation>>(ResultCode.Ok, "OK", contractInvations);
             return result;
         }
 
@@ -197,28 +236,11 @@ namespace FlowChatApp.Service
             return result;
         }
 
-        public async Task<Result<List<Group>>> GetGroups()
-        {
-            var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
-            return result;
-        }
+        #endregion
 
-        public async Task<Result<List<Group>>> SearchGroup(string groupName)
-        {
-            var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
-            return result;
-        }
-        public async Task<Result> JoinGroup(long groupId)
-        {
-            var result = new Result(ResultCode.Ok, "OK", null);
-            return result;
-        }
-        public async Task<Result<List<User>>> SearchUser(SearchType type, string value)
-        {
-            var result = new Result<List<User>>(ResultCode.Ok, "OK", Users);
-            return result;
-        }
 
+
+        #region chat
         public async Task<Result> SendGroupMessage(long groupId, string content)
         {
             var result = Result.BadRequest;
@@ -269,42 +291,41 @@ namespace FlowChatApp.Service
             }
             return result;
         }
-
-        public async Task<Result<ChatService.TokenClass>> SignInAsync(string username, string password)
+        public async Task<Result<List<PrivateChat>>> GetPrivateChatHistory()
         {
-            var result = new Result<ChatService.TokenClass>(ResultCode.Ok, "OK", new ChatService.TokenClass());
+            string json = JsonConvert.SerializeObject(Chats.OfType<PrivateChat>());
+            var chats = JsonConvert.DeserializeObject<List<PrivateChat>>(json);
+            var result = new Result<List<PrivateChat>>(ResultCode.Ok, "OK", chats);
             return result;
         }
 
-        public async Task<Result> SignOutAsync()
+        public async Task<Result<List<GroupChat>>> GetGroupChatHistory()
         {
-            var result = new Result(ResultCode.Ok, "OK", null);
+            string json = JsonConvert.SerializeObject(Chats.OfType<GroupChat>());
+            var chats = JsonConvert.DeserializeObject<List<GroupChat>>(json);
+            var result = new Result<List<GroupChat>>(ResultCode.Ok, "OK", chats);
             return result;
         }
-
-        public async Task<Result> SignUpAsync(string email, string username, string nickname, string password)
+        public async Task<Result<List<Chat>>> GetChatHistory()
         {
-            var result = Result.BadRequest;
+            var chats = new List<Chat>();
+
+            string json = JsonConvert.SerializeObject(Chats.OfType<PrivateChat>());
+            var privateChats = JsonConvert.DeserializeObject<List<PrivateChat>>(json);
+            chats.AddRange(privateChats);
+
+            json = JsonConvert.SerializeObject(Chats.OfType<GroupChat>());
+            var groupChats = JsonConvert.DeserializeObject<List<GroupChat>>(json);
+            chats.AddRange(groupChats);
+
+            var result = new Result<List<Chat>>(ResultCode.Ok, "OK", chats);
             return result;
         }
+        #endregion
 
-        public async Task<Result> UnblockContact(string id)
+        public void Connect(IPAddress ipAddress, int port)
         {
-            var result = Result.BadRequest;
-            return result;
-        }
-
-        public async Task<Result<Account>> UpdateAccountInfo(Account account)
-        {
-            CurrentAccount.MergeFrom(account);
-            var result = new Result<Account>(ResultCode.Ok, "OK", CurrentAccount);
-            return result;
-        }
-
-        public async Task<Result> UploadAvator(string filename, byte[] avator)
-        {
-            var result = Result.BadRequest;
-            return result;
+            return;
         }
 
         public DemoChatService()
@@ -327,6 +348,10 @@ namespace FlowChatApp.Service
         List<Chat> Chats = new List<Chat>();
 
         List<ContractInvation> contractInvations = new List<ContractInvation>();
+
+        #region set sample data
+
+
 
         void SetUpUsers()
         {
@@ -451,5 +476,9 @@ namespace FlowChatApp.Service
                 new ContractInvation(GenContractInvationId(), Users[3].UserName, "HeyHey!")
             });
         }
+
+
+        #endregion
+
     }
 }

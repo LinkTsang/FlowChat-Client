@@ -18,38 +18,53 @@ namespace FlowChatApp.Service.Interface
     {
         event EventHandler<ChatMessage> ChatMessageReceived;
         event EventHandler<ContractInvation> ContactRequsetMessageReceived;
+        event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
         event EventHandler<Result> BadRequestRaised;
 
-        Task<Result> AddContact(string username, string categoryName, string message);
-        Task<Result> AddGroup(string groupName);
-        Task<Result> JoinGroup(long groupId);
-        Task<Result> AddGroupMember(string groupName, string userName);
-        Task<Result> BlockContact(string id);
-        Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName);
-        void Connect(IPAddress ipAddress, int port);
-        Task<Result> DeleteContact(long id);
-        Task<Result> DeleteGroup(string groupName);
+        #region account
+        Task<Result> SignUpAsync(string email, string username, string nickname, string password);
+        Task<Result<ChatService.TokenClass>> SignInAsync(string username, string password);
+        Task<Result> SignOutAsync();
+        Task<Result<ChatService.TokenClass>> UpdateToken();
+        Task<Result<Account>> UpdateAccountInfo(Account account);
         Task<Result<Account>> GetAccountInfo();
-        Task<Result<byte[]>> GetAvator();
-        Task<Result<List<string>>> GetBlocked();
+        Task<Result> UploadAvator(string filename, byte[] avator);
+        #endregion
+
+        #region contract
+        Task<Result<List<Contract>>> GetContacts();
+        Task<Result> AddContact(string username, string categoryName, string message);
+        Task<Result> DeleteContact(long id);
+        Task<Result<List<Contract>>> UpdateContact(string username, string alias, string categroy);
+        Task<Result<List<ContractInvation>>> GetContractInvations();
+        Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName, bool accept);
+        Task<Result<List<InvationConfirmation>>> GetInvationConfirmations();
+
+        #endregion
+
+        #region user
+        Task<Result<User>> GetUserInfo(string username);
+        Task<Result<List<User>>> SearchUser(SearchType type, string value);
+        Task<Result<byte[]>> GetAvator(string url);
+        #endregion
+
+        #region group
+        Task<Result<List<Group>>> GetGroups();
+        Task<Result> JoinGroup(long groupId);
+        Task<Result> CreateGroup(string groupName);
+        Task<Result> LeaveGroup(string groupName);
+        Task<Result<List<Group>>> SearchGroup(string groupName);
+        Task<Result> AddGroupMember(string groupName, string userName);
+        Task<Result> DeleteGroup(string groupName);
+        Task<Result> RenameGroup(string oldName, string newName);
+        #endregion
+
+        #region chat
+        Task<Result> SendMessage(string username, string content);
+        Task<Result> SendGroupMessage(long groupId, string content);
         Task<Result<List<PrivateChat>>> GetPrivateChatHistory();
         Task<Result<List<GroupChat>>> GetGroupChatHistory();
         Task<Result<List<Chat>>> GetChatHistory();
-
-        Task<Result<List<Contract>>> GetContacts();
-        Task<Result> GetContactStatus(params string[] ids);
-        Task<Result<List<ContractInvation>>> GetContractInvation();
-        Task<Result> RenameGroup(string oldName, string newName);
-        Task<Result<List<Group>>> GetGroups();
-        Task<Result<List<Group>>> SearchGroup(string groupName);
-        Task<Result<List<User>>> SearchUser(SearchType type, string value);
-        Task<Result> SendGroupMessage(long groupId, string content);
-        Task<Result> SendMessage(string username, string content);
-        Task<Result<ChatService.TokenClass>> SignInAsync(string username, string password);
-        Task<Result> SignOutAsync();
-        Task<Result> SignUpAsync(string email, string username, string nickname, string password);
-        Task<Result> UnblockContact(string id);
-        Task<Result<Account>> UpdateAccountInfo(Account account);
-        Task<Result> UploadAvator(string filename, byte[] avator);
+        #endregion
     }
 }
