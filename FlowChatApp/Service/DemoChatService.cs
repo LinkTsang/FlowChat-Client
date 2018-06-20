@@ -231,9 +231,18 @@ namespace FlowChatApp.Service
                     chat = new GroupChat(group);
                     Chats.Add(chat);
                 }
-                var message = new GroupMessage(GenMessageId(), DateTime.Now, CurrentAccount, group, content);
-                chat.AddMessage(message);
-                ChatMessageReceived?.Invoke(this, message);
+                var m0 = new GroupMessage(GenMessageId(), DateTime.Now, CurrentAccount, group, content);
+                chat.AddMessage(m0);
+                ChatMessageReceived?.Invoke(this, m0);
+
+                int i = 0;
+                var r = group.Members.Where(u => u.UserName != CurrentAccount.UserName);
+                foreach (var m in r)
+                {
+                    var msg = new GroupMessage(GenMessageId(), DateTime.Now, m, group, $"{content} + {++i}");
+                    chat.AddMessage(msg);
+                    ChatMessageReceived?.Invoke(this, msg);
+                }
             }
             return result;
         }
@@ -250,9 +259,13 @@ namespace FlowChatApp.Service
                     chat = new PrivateChat(contract);
                     Chats.Add(chat);
                 }
-                var message = new PrivateMessage(GenMessageId(), DateTime.Now, CurrentAccount, contract.User, content);
-                chat.AddMessage(message);
-                ChatMessageReceived?.Invoke(this, message);
+                var m0 = new PrivateMessage(GenMessageId(), DateTime.Now, CurrentAccount, contract.User, content);
+                chat.AddMessage(m0);
+                ChatMessageReceived?.Invoke(this, m0);
+
+                var m1 = new PrivateMessage(GenMessageId(), DateTime.Now, contract.User, CurrentAccount, $"I know you said: {content}");
+                chat.AddMessage(m1);
+                ChatMessageReceived?.Invoke(this, m1);
             }
             return result;
         }
@@ -414,7 +427,7 @@ namespace FlowChatApp.Service
         }
         void SetUpChats()
         {
-            var privateChat = new PrivateChat(Contracts[1]);
+            var privateChat = new PrivateChat(Contracts[0]);
             Array.ForEach(new[]
             {
                 new PrivateMessage(GenMessageId(), DateTime.Now, Users[0], Users[1], "Hello!"),
