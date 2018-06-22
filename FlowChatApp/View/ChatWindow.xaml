@@ -8,7 +8,8 @@
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:FlowChatApp.ViewModel"
         Title="FlowChat"
-        Height="540" Width="960"
+        Height="540"
+        Width="960"
         MinWidth="600"
         DataContext="{Binding Path=Chat, Source={StaticResource Locator}}"
         d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}">
@@ -23,13 +24,16 @@
             <local:GroupInfoView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AccountInfoViewModel}">
-            <local:AccountInfoView/>
+            <local:AccountInfoView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AddGroupViewModel}">
-            <local:AddGroupView/>
+            <local:AddGroupView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AddContractViewModel}">
-            <local:AddContractView/>
+            <local:AddContractView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ErrorMessageViewModel}">
+            <local:ErrorMessageView />
         </DataTemplate>
         <Style TargetType="TabItem">
             <Setter Property="Template">
@@ -37,17 +41,23 @@
                     <ControlTemplate TargetType="TabItem">
                         <Grid Name="Panel">
                             <ContentPresenter x:Name="ContentSite"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Stretch"
-                                        ContentSource="Header"
-                                        Margin="10,2"/>
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Stretch"
+                                              ContentSource="Header"
+                                              Margin="10,2" />
                         </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Panel" Property="Background" Value="LightSkyBlue" />
+                            <Trigger Property="IsSelected"
+                                     Value="True">
+                                <Setter TargetName="Panel"
+                                        Property="Background"
+                                        Value="LightSkyBlue" />
                             </Trigger>
-                            <Trigger Property="IsSelected" Value="False">
-                                <Setter TargetName="Panel" Property="Background" Value="White" />
+                            <Trigger Property="IsSelected"
+                                     Value="False">
+                                <Setter TargetName="Panel"
+                                        Property="Background"
+                                        Value="White" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -57,56 +67,74 @@
     </Window.Resources>
     <md:DialogHost CloseOnClickAway="True">
         <md:DialogHost.DialogContent>
-            <ContentControl Content="{Binding}"/>
+            <ContentControl Content="{Binding}" />
         </md:DialogHost.DialogContent>
         <md:DrawerHost HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch"
-                   BorderThickness="0"
-                   BorderBrush="{DynamicResource MaterialDesignDivider}"
-                   IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
+                       VerticalAlignment="Stretch"
+                       BorderThickness="0"
+                       BorderBrush="{DynamicResource MaterialDesignDivider}"
+                       IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
             <md:DrawerHost.LeftDrawerContent>
-                <StackPanel Margin="16" Width="200" HorizontalAlignment="Center">
-                    <Button Width="100" Height="100" Padding="0" Margin="10" Command="{Binding ShowAccountInfoCommand}">
-                        <Image Width="100" Height="100" Source="{Binding CurrentAccount.Avatar}" Cursor="Hand"/>
+                <StackPanel Margin="16"
+                            Width="200"
+                            HorizontalAlignment="Center">
+                    <Button Width="100"
+                            Height="100"
+                            Padding="0"
+                            Margin="10"
+                            Command="{Binding ShowAccountInfoCommand}">
+                        <Image Width="100"
+                               Height="100"
+                               Source="{Binding CurrentAccount.Avatar}"
+                               Cursor="Hand" />
                     </Button>
-                    <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,10">
-                        <TextBlock Text="{Binding CurrentAccount.UserName}"/>
-                        <TextBlock Foreground="Gray" Text=" ("/>
-                        <TextBlock Foreground="Gray" Text="{Binding CurrentAccount.NickName}"/>
-                        <TextBlock Foreground="Gray" Text=") "/>
+                    <WrapPanel HorizontalAlignment="Center"
+                               Margin="0,10,0,10">
+                        <TextBlock Text="{Binding CurrentAccount.UserName}" />
+                        <TextBlock Foreground="Gray"
+                                   Text=" (" />
+                        <TextBlock Foreground="Gray"
+                                   Text="{Binding CurrentAccount.NickName}" />
+                        <TextBlock Foreground="Gray"
+                                   Text=") " />
                     </WrapPanel>
-                    <TextBlock Margin="0,0,0,0" Foreground="Gray" Text="FlowChat" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                    <TextBlock Margin="0,0,0,0"
+                               Foreground="Gray"
+                               Text="FlowChat"
+                               VerticalAlignment="Bottom"
+                               HorizontalAlignment="Center" />
                 </StackPanel>
             </md:DrawerHost.LeftDrawerContent>
             <Grid Background="{DynamicResource MaterialDesignBackground}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="60"/>
-                    <RowDefinition/>
+                    <RowDefinition Height="60" />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition MinWidth="200" Width="200"/>
-                    <ColumnDefinition MinWidth="200" Width="*"/>
+                    <ColumnDefinition MinWidth="200"
+                                      Width="200" />
+                    <ColumnDefinition MinWidth="200"
+                                      Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Row="0" Grid.Column="0"
-                    Orientation="Horizontal"
-                    Background="{DynamicResource MaterialDesignLightBackground}"
-                    DataContext="{Binding CurrentAccount}"
-                    Width="200">
+                <StackPanel Grid.Row="0"
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            Background="{DynamicResource MaterialDesignLightBackground}"
+                            DataContext="{Binding CurrentAccount}"
+                            Width="200">
                     <ToggleButton Margin="10"
-                     Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
-                     IsChecked="False" x:Name="MenuToggleButton"/>
-                    <Grid Margin="0" Width="143">
+                                  Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
+                                  IsChecked="False"
+                                  x:Name="MenuToggleButton" />
+                    <Grid Margin="0"
+                          Width="143">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition
-                        Width="Auto" />
-                            <ColumnDefinition
-                        Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Button
-                    Style="{DynamicResource MaterialDesignToolButton}">
-                            <md:PackIcon
-                        Kind="Magnify"
-                        Opacity=".56" />
+                        <Button Style="{DynamicResource MaterialDesignToolButton}">
+                            <md:PackIcon Kind="Magnify"
+                                         Opacity=".56" />
                         </Button>
                         <TextBox Grid.Column="1"
                                  Margin="8 0 8 0"
@@ -116,30 +144,36 @@
                                  VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>
-                <Border Grid.Row="0" Grid.Column="1"
-                BorderThickness="0,1,0,1">
-                    <TextBlock x:Name="TitleBar" 
-                       HorizontalAlignment="Left" VerticalAlignment="Center"
-                       Margin="5"
-                       FontSize="20"
-                       Text="{Binding CurrentChat.PeerName}"/>
+                <Border Grid.Row="0"
+                        Grid.Column="1"
+                        BorderThickness="0,1,0,1">
+                    <TextBlock x:Name="TitleBar"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Margin="5"
+                               FontSize="20"
+                               Text="{Binding CurrentChat.PeerName}" />
                 </Border>
-                <TabControl Grid.Row="1" Grid.Column="0"
-                    TabStripPlacement="Bottom"
-                    BorderThickness="0"
-                    Background="{DynamicResource MaterialDesignLightBackground}">
-                    <TabItem Header="Chat" d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
-                        <local:ChatListView/>
+                <TabControl Grid.Row="1"
+                            Grid.Column="0"
+                            TabStripPlacement="Bottom"
+                            BorderThickness="0"
+                            Background="{DynamicResource MaterialDesignLightBackground}">
+                    <TabItem Header="Chat"
+                             d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        <local:ChatListView />
                     </TabItem>
                     <TabItem Header="Contract">
-                        <local:ContractListView/>
+                        <local:ContractListView />
                     </TabItem>
                     <TabItem Header="Group">
-                        <local:GroupListView/>
+                        <local:GroupListView />
                     </TabItem>
                 </TabControl>
-                <ContentControl Grid.Row="1" Grid.Column="1"
-                        Content="{Binding Path=CurrentContentViewModel, Mode=TwoWay}"/>
+                <ContentControl Grid.Row="1"
+                                Grid.Column="1"
+                                Content="{Binding Path=CurrentContentViewModel, Mode=TwoWay}" />
             </Grid>
         </md:DrawerHost>
     </md:DialogHost>

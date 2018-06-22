@@ -12,6 +12,6 @@ namespace FlowChatApp.Service.Interface
 
         string OpenFile(string caption, string filter = "Image files (*.png;*.jpeg)|*.png;*.jpeg|All files (*.*)|*.*");
 
-        void ShowDialog(object content, Action<object> closeingAction);
+        void ShowDialog(object content, Action<object> closeingAction = null);
     }
 }

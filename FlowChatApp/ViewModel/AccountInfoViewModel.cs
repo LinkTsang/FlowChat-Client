@@ -51,7 +51,8 @@ namespace FlowChatApp.ViewModel
                 var uploadResult = await ChatService.UploadAvator(Path.GetFileName(path), bytes);
                 if(uploadResult.Ok)
                 {
-                    Account.Avatar = path;
+                    Account.HeadUrl = uploadResult.Data["fileUrl"].ToString();
+                    Account.UpdateAvatar();
                 }
             }
         }

@@ -1,12 +1,15 @@
 ﻿using FlowChatApp.Model;
 using FlowChatApp.Service.Interface;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FlowChatApp.Service
 {
@@ -16,6 +19,7 @@ namespace FlowChatApp.Service
         long _userId;
         long _messageId;
         long _contractInvationId;
+        long _InvationId;
         long GenGroupId()
         {
             return _groupId++;
@@ -34,6 +38,10 @@ namespace FlowChatApp.Service
             return _contractInvationId++;
         }
 
+        long GenInvationId()
+        {
+            return _InvationId++;
+        }
         public event EventHandler<ChatMessage> ChatMessageReceived;
         public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
         public event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
@@ -57,9 +65,10 @@ namespace FlowChatApp.Service
             var result = new Result(ResultCode.Ok, "OK", null);
             return result;
         }
-        public Task<Result<ChatService.TokenClass>> UpdateToken()
+        public async Task<Result<ChatService.TokenClass>> UpdateToken()
         {
-            throw new NotImplementedException();
+            var result = new Result<ChatService.TokenClass>(ResultCode.Ok, "OK", new ChatService.TokenClass());
+            return result;
         }
 
         public async Task<Result<Account>> UpdateAccountInfo(Account account)
@@ -77,7 +86,14 @@ namespace FlowChatApp.Service
 
         public async Task<Result> UploadAvator(string filename, byte[] avator)
         {
-            var result = Result.BadRequest;
+            var fileUrl = "\\images\\" + filename;
+            var jObject = new JObject()
+            {
+                ["fileUrl"] = fileUrl,
+            };
+            CurrentAccount.HeadUrl = fileUrl;
+            _avatarDict[CurrentAccount.UserName] = avator;
+            var result = new Result(ResultCode.Ok, "OK", jObject);
             return result;
         }
 
@@ -97,15 +113,17 @@ namespace FlowChatApp.Service
                 var user = Users.FirstOrDefault(u => u.UserName == username);
                 if (user != null)
                 {
+                    var invation = new ContractInvation(GenContractInvationId(), username, message);
+                    ContactRequsetMessageReceived?.Invoke(this, invation);
                     return Result.OKRequest;
                 }
             }
             return result;
         }
-        public async Task<Result> DeleteContact(long id)
+        public async Task<Result> DeleteContact(string username)
         {
             var result = Result.BadRequest;
-            var contract = Contracts.FirstOrDefault(c => c.User.Id == id);
+            var contract = Contracts.FirstOrDefault(c => c.User.UserName == username);
             if (contract != null)
             {
                 Contracts.Remove(contract);
@@ -113,24 +131,26 @@ namespace FlowChatApp.Service
             }
             return result;
         }
-        public async Task<Result<List<Contract>>> UpdateContact(string username, string alias, string categroy)
+        public async Task<Result> UpdateContact(string username, string alias)
         {
-            var result = new Result<List<Contract>>(ResultCode.Ok, "OK", Contracts);
+            var result = new Result(ResultCode.Ok, "OK", null);
             return result;
         }
 
         public async Task<Result<List<ContractInvation>>> GetContractInvations()
         {
-            var result = new Result<List<ContractInvation>>(ResultCode.Ok, "OK", contractInvations);
+            var result = new Result<List<ContractInvation>>(ResultCode.Ok, "OK", null);
             return result;
         }
-        public async Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName, bool accept)
+        public async Task<Result> ConfirmContractInvation(string recordId, string categoryName, bool accept)
         {
-            return null;
+            var result = new Result(ResultCode.Ok, "OK", null);
+            return result;
         }
-        public Task<Result<List<InvationConfirmation>>> GetInvationConfirmations()
+        public async Task<Result<List<ContractInvation>>> GetInvationConfirmations()
         {
-            throw new NotImplementedException();
+            var result = new Result<List<ContractInvation>>(ResultCode.Ok, "OK", null);
+            return result;
         }
 
         #endregion
@@ -138,7 +158,12 @@ namespace FlowChatApp.Service
         #region user
         public async Task<Result<User>> GetUserInfo(string username)
         {
-            var result = new Result<User>(ResultCode.Ok, "OK", Users[1]);
+            var result = Result<User>.ErrorMessage("BadRequest");
+            var user = Users.FirstOrDefault(u => u.UserName == username);
+            if (user != null)
+            {
+                result = new Result<User>(ResultCode.Ok, "OK", user);
+            }
             return result;
         }
 
@@ -148,26 +173,27 @@ namespace FlowChatApp.Service
             return result;
         }
 
-        public async Task<Result<byte[]>> GetAvator(string url)
+        static byte[] ReadFully(Stream input)
         {
-            var result = new Result<byte[]>(ResultCode.Ok, "OK");
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
+        public async Task<Result<byte[]>> GetAvator(string username)
+        {
+            var result = new Result<byte[]>(ResultCode.Ok, "OK", _avatarDict[username]);
             return result;
         }
         #endregion
 
         #region group
-
-        public async Task<Result<List<Group>>> GetGroups()
-        {
-            var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
-            return result;
-        }
-        public async Task<Result> JoinGroup(long groupId)
-        {
-            var result = new Result(ResultCode.Ok, "OK", null);
-            return result;
-        }
-
         public async Task<Result> CreateGroup(string groupName)
         {
             var result = Result.BadRequest;
@@ -178,24 +204,69 @@ namespace FlowChatApp.Service
             }
             return result;
         }
-        public async Task<Result> LeaveGroup(string groupName)
+        public async Task<Result> DeleteGroup(long groupId)
         {
             var result = Result.BadRequest;
-            var group = JoinedGroups.FirstOrDefault(g => g.Name == groupName);
-            if (group != null)
+            var groups = Groups.FirstOrDefault(g => g.Id == groupId);
+            if (groups != null)
             {
-                JoinedGroups.Remove(group);
+                Groups.Remove(groups);
                 result = Result.OKRequest;
             }
             return result;
         }
-
-        public async Task<Result<List<Group>>> SearchGroup(string groupName)
+        public async Task<Result<Group>> GetGroup(long groupId)
+        {
+            var result = new Result<Group>(ResultCode.Bad, "BadRequest");
+            var group = Groups.FirstOrDefault(g => g.Id == groupId);
+            if (group != null)
+            {
+                result.Data = await Task.Run(() => group);
+            }
+            return result;
+        }
+        public async Task<Result<List<Group>>> GetGroups()
         {
             var result = new Result<List<Group>>(ResultCode.Ok, "OK", JoinedGroups);
             return result;
         }
-
+        public async Task<Result> JoinGroup(long groupId)
+        {
+            var result = Result.BadRequest;
+            var group = Groups.FirstOrDefault(g => g.Id == groupId);
+            var member = group.Members.FirstOrDefault(m => m.UserName == CurrentAccount.UserName);
+            if (group != null && member == null)
+            {
+                group.Members.Add(CurrentAccount);
+                result = new Result(ResultCode.Ok, "OK", null);
+            }
+            return result;
+        }
+        public async Task<Result> RenameGroup(long groupId, string newName)
+        {
+            var result = Result.BadRequest;
+            var oldGroup = Groups.FirstOrDefault(g => g.Id == groupId);
+            var newGroup = Groups.FirstOrDefault(g => g.Name == newName);
+            if (oldGroup != null && newGroup == null)
+            {
+                oldGroup.Name = newName;
+                result = Result.OKRequest;
+            }
+            return result;
+        }
+        public async Task<Result> LeaveGroup(long groupId)
+        {
+            var result = Result.BadRequest;
+            var group = JoinedGroups.FirstOrDefault(g => g.Id == groupId);
+            var member = group.Members.FirstOrDefault(u => u.UserName == CurrentAccount.UserName);
+            if (group != null && member != null)
+            {
+                JoinedGroups.Remove(group);
+                group.Members.Remove(member);
+                result = Result.OKRequest;
+            }
+            return result;
+        }
         public async Task<Result> AddGroupMember(string groupName, string userName)
         {
             var result = Result.BadRequest;
@@ -211,31 +282,11 @@ namespace FlowChatApp.Service
             }
             return result;
         }
-
-        public async Task<Result> DeleteGroup(string groupName)
+        public async Task<Result<List<Group>>> SearchGroups(string name)
         {
-            var result = Result.BadRequest;
-            var groups = Groups.FirstOrDefault(g => g.Name == groupName);
-            if (groups != null)
-            {
-                Groups.Remove(groups);
-                result = Result.OKRequest;
-            }
+            var result = new Result<List<Group>>(ResultCode.Ok, "OK", Groups);
             return result;
         }
-
-        public async Task<Result> RenameGroup(string oldName, string newName)
-        {
-            var result = Result.BadRequest;
-            var oldGroup = Groups.FirstOrDefault(g => g.Name == oldName);
-            var newGroup = Groups.FirstOrDefault(g => g.Name == newName);
-            if (oldGroup != null && newGroup == null)
-            {
-                oldGroup.Name = newName;
-            }
-            return result;
-        }
-
         #endregion
 
 
@@ -349,9 +400,15 @@ namespace FlowChatApp.Service
 
         List<ContractInvation> contractInvations = new List<ContractInvation>();
 
+        Dictionary<string, byte[]> _avatarDict = new Dictionary<string, byte[]>();
+
         #region set sample data
 
-
+        static byte[] LoadResource(string resourcePath)
+        {
+            var info = Application.GetResourceStream(new Uri(resourcePath));
+            return ReadFully(info.Stream);
+        }
 
         void SetUpUsers()
         {
@@ -395,6 +452,11 @@ namespace FlowChatApp.Service
                     Status = "test!"
                 }
             });
+
+            _avatarDict[Users[0].UserName] = LoadResource(User.DefaultBoyAvatar);
+            _avatarDict[Users[1].UserName] = LoadResource(User.DefaultAvatar);
+            _avatarDict[Users[2].UserName] = LoadResource(User.DefaultGirlAvatar);
+            _avatarDict[Users[3].UserName] = LoadResource(User.DefaultGirlAvatar);
         }
 
         void SetUpGroups()
@@ -475,6 +537,16 @@ namespace FlowChatApp.Service
             contractInvations.AddRange(new[] {
                 new ContractInvation(GenContractInvationId(), Users[3].UserName, "HeyHey!")
             });
+        }
+
+        public Task<Result<List<PrivateChat>>> GetUnreadPrivateChatHistory()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<List<GroupChat>>> GetUnreadGroupChatHistory()
+        {
+            throw new NotImplementedException();
         }
 
 

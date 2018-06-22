@@ -62,7 +62,7 @@ namespace FlowChatApp.ViewModel
         public RelayCommand SearchCommand { get; }
         async void SearchGroup()
         {
-            var results = (await ChatService.SearchGroup(SearchText)).Data;
+            var results = (await ChatService.SearchGroups(SearchText)).Data;
             Groups.Clear();
             results.ForEach(g => Groups.Add(g));
         }

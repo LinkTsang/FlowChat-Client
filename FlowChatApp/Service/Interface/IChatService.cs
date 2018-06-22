@@ -34,29 +34,30 @@ namespace FlowChatApp.Service.Interface
         #region contract
         Task<Result<List<Contract>>> GetContacts();
         Task<Result> AddContact(string username, string categoryName, string message);
-        Task<Result> DeleteContact(long id);
-        Task<Result<List<Contract>>> UpdateContact(string username, string alias, string categroy);
+        Task<Result> DeleteContact(string username);
+        Task<Result> UpdateContact(string username, string alias);
         Task<Result<List<ContractInvation>>> GetContractInvations();
-        Task<Result<List<ContractInvation>>> ConfirmContractInvation(string recordId, string categoryName, bool accept);
-        Task<Result<List<InvationConfirmation>>> GetInvationConfirmations();
+        Task<Result> ConfirmContractInvation(string recordId, string categoryName, bool accept);
+        Task<Result<List<ContractInvation>>> GetInvationConfirmations();
 
         #endregion
 
         #region user
         Task<Result<User>> GetUserInfo(string username);
         Task<Result<List<User>>> SearchUser(SearchType type, string value);
-        Task<Result<byte[]>> GetAvator(string url);
+        Task<Result<byte[]>> GetAvator(string username);
         #endregion
 
         #region group
         Task<Result<List<Group>>> GetGroups();
         Task<Result> JoinGroup(long groupId);
         Task<Result> CreateGroup(string groupName);
-        Task<Result> LeaveGroup(string groupName);
-        Task<Result<List<Group>>> SearchGroup(string groupName);
+        Task<Result> LeaveGroup(long groupName);
+        Task<Result<Group>> GetGroup(long groupId);
         Task<Result> AddGroupMember(string groupName, string userName);
-        Task<Result> DeleteGroup(string groupName);
-        Task<Result> RenameGroup(string oldName, string newName);
+        Task<Result> DeleteGroup(long groupId);
+        Task<Result> RenameGroup(long groupId, string newName);
+        Task<Result<List<Group>>> SearchGroups(string name);
         #endregion
 
         #region chat
@@ -65,6 +66,8 @@ namespace FlowChatApp.Service.Interface
         Task<Result<List<PrivateChat>>> GetPrivateChatHistory();
         Task<Result<List<GroupChat>>> GetGroupChatHistory();
         Task<Result<List<Chat>>> GetChatHistory();
+        Task<Result<List<PrivateChat>>> GetUnreadPrivateChatHistory();
+        Task<Result<List<GroupChat>>> GetUnreadGroupChatHistory();
         #endregion
     }
 }

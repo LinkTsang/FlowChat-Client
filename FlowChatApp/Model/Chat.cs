@@ -46,6 +46,13 @@ namespace FlowChatApp.Model
             set => Set(ref _sender, value);
         }
 
+        string _senderName;
+        public string SenderName
+        {
+            get => _senderName;
+            set => Set(ref _senderName, value);
+        }
+
         string _content;
         public string Content
         {
@@ -66,6 +73,9 @@ namespace FlowChatApp.Model
             get
             {
                 var main = SimpleIoc.Default.GetInstance<ChatViewModel>();
+                if (main.CurrentAccount == null) {
+                    return false;
+                }
                 return main.CurrentAccount.Id == Sender.Id;
             }
         }
@@ -88,6 +98,13 @@ namespace FlowChatApp.Model
             get => _receiver;
             set => Set(ref _receiver, value);
         }
+
+        string _receiverName;
+        public string ReceiverName
+        {
+            get => _receiverName;
+            set => Set(ref _receiverName, value);
+        }
     }
 
     public class GroupMessage : ChatMessage
@@ -107,6 +124,13 @@ namespace FlowChatApp.Model
         {
             get => _group;
             set => Set(ref _group, value);
+        }
+
+        long _groupId;
+        public long GroudId
+        {
+            get => _groupId;
+            set => Set(ref _groupId, value);
         }
     }
 

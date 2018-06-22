@@ -48,6 +48,8 @@ namespace FlowChatApp.ViewModel
             SimpleIoc.Default.Register<AddContractViewModel>();
             SimpleIoc.Default.Register<AddGroupViewModel>();
 
+            SimpleIoc.Default.Register<ErrorMessageViewModel>();
+
         }
 
         static ViewModelLocator()
@@ -103,6 +105,11 @@ namespace FlowChatApp.ViewModel
         public AddContractViewModel AddContract
         {
             get => ServiceLocator.Current.GetInstance<AddContractViewModel>();
+        }
+
+        public ErrorMessageViewModel ErrorMessage
+        {
+            get => ServiceLocator.Current.GetInstance<ErrorMessageViewModel>();
         }
         public IChatService ChatService
         {

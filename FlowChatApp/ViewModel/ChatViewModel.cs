@@ -220,7 +220,7 @@ namespace FlowChatApp.ViewModel
         {
             WindowService.ShowDialog(AddContractViewModel, p =>
             {
-
+               
 
             });
         }
@@ -231,18 +231,38 @@ namespace FlowChatApp.ViewModel
         {
             WindowService.ShowDialog(AddGroupViewModel, p =>
             {
-
-
+                if (p == null)
+                {
+                    
+                }
             });
         }
         IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
+
+        ErrorMessageViewModel ErrorMessageViewModel => ServiceLocator.Current.GetInstance<ErrorMessageViewModel>();
         public RelayCommand ShowAccountInfoCommand { get; }
         public void ShowAccountInfo()
         {
-            WindowService.ShowDialog(AccountInfoViewModel, p =>
+            WindowService.ShowDialog(AccountInfoViewModel, async p =>
             {
-
-
+                if (p == null)
+                {
+                    return;
+                }
+                var update = (bool)p;
+                if (update)
+                {
+                    var result = await ChatService.UpdateAccountInfo(CurrentAccount);
+                    if (result.Ok)
+                    {
+                        CurrentAccount = result.Data;
+                    }
+                    else
+                    {
+                        ErrorMessageViewModel.Message = result.Message;
+                        WindowService.ShowDialog(ErrorMessageViewModel);
+                    }
+                }
             });
         }
     }

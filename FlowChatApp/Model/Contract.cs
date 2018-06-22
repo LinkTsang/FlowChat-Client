@@ -108,11 +108,25 @@ namespace FlowChatApp.Model
             set => Set(ref _friendName, value);
         }
 
-        bool _accpeted;
-        public bool Accepted
+        string _message = string.Empty;
+        public string Message
         {
-            get => _accpeted;
-            set => Set(ref _accpeted, value);
+            get => _message;
+            set => Set(ref _message, value);
+        }
+
+        int _tag;
+        public int Tag
+        {
+            get => _tag;
+            set => Set(ref _tag, value);
+        }
+
+        int _categoryName;
+        public int CategoryName
+        {
+            get => _categoryName;
+            set => Set(ref _categoryName, value);
         }
     }
 }
