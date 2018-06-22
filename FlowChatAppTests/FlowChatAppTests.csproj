@@ -94,9 +94,11 @@
       <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Presentation" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -121,6 +123,45 @@
       <Project>{2DE0CF20-2DBD-4272-8680-4C120C6F5AFD}</Project>
       <Name>FlowChatApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\ai.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\attachment.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\boy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\chat.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\download.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\file.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\font.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\girl.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\group.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\picture.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\textcolor.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\user.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\users.png" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

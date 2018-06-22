@@ -129,7 +129,9 @@
     </ApplicationDefinition>
     <Compile Include="Service\ChatService.cs" />
     <Compile Include="Service\DemoChatService.cs" />
+    <Compile Include="Utility\DispatcherFetcher.cs" />
     <Compile Include="ViewModel\AddGroupViewModel.cs" />
+    <Compile Include="ViewModel\ErrorMessageViewModel.cs" />
     <Compile Include="ViewModel\LoginViewModel.cs" />
     <Compile Include="ViewModel\AddContractViewModel.cs" />
     <Compile Include="ViewModel\SearchViewModel.cs" />
@@ -141,6 +143,9 @@
     </Compile>
     <Compile Include="View\AddGroupView.xaml.cs">
       <DependentUpon>AddGroupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ErrorMessageView.xaml.cs">
+      <DependentUpon>ErrorMessageView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Interface\ISignUpView.cs" />
     <Compile Include="View\Interface\ISignInView.cs" />
@@ -179,6 +184,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\ChatListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ErrorMessageView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -301,6 +310,9 @@
     <Resource Include="Images\boy.png" />
     <Resource Include="Images\girl.png" />
     <Resource Include="Images\group.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\ai.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
