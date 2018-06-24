@@ -14,6 +14,7 @@ using CommonServiceLocator;
 using FlowChatApp.Service.Interface;
 using System.Windows;
 using FlowChatApp.Utility;
+using System.Diagnostics;
 
 namespace FlowChatApp.Model
 {
@@ -46,15 +47,24 @@ namespace FlowChatApp.Model
         static ImageSource GenImageSource(byte[] imageData)
         {
             var image = new BitmapImage();
+
             using (var memory = new MemoryStream(imageData))
             {
                 memory.Position = 0;
                 image.BeginInit();
                 image.StreamSource = memory;
                 image.CacheOption = BitmapCacheOption.OnLoad;
-                image.EndInit();
+                try
+                {
+                    image.EndInit();
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e);
+                    image = null;
+                }
             }
-            image.Freeze();
+            image?.Freeze();
             return image;
         }
 
@@ -73,9 +83,9 @@ namespace FlowChatApp.Model
         }
         static User()
         {
-            //DefaultAvatarImage = GenDefaultAvatar(DefaultAvatar);
-            //DefaultBoyAvatarImage = GenDefaultAvatar(DefaultBoyAvatar);
-            //DefaultGirlAvatarImage = GenDefaultAvatar(DefaultGirlAvatar);
+            DefaultAvatarImage = GenDefaultAvatar(DefaultAvatar);
+            DefaultBoyAvatarImage = GenDefaultAvatar(DefaultBoyAvatar);
+            DefaultGirlAvatarImage = GenDefaultAvatar(DefaultGirlAvatar);
         }
 
         public User()
@@ -100,8 +110,8 @@ namespace FlowChatApp.Model
         {
             _id = id;
             _email = email;
-            _userName = username;
-            _nickName = nickname;
+            _username = username;
+            _nickname = nickname;
             _region = region;
             _phone = phone;
             _status = status;
@@ -113,8 +123,8 @@ namespace FlowChatApp.Model
         {
             Id = user.Id;
             Email = user.Email;
-            UserName = user.UserName;
-            NickName = user.NickName;
+            Username = user.Username;
+            Nickname = user.Nickname;
             Region = user.Region;
             Phone = user.Phone;
             Status = user.Status;
@@ -136,18 +146,18 @@ namespace FlowChatApp.Model
             set => Set(ref _email, value);
         }
 
-        string _userName = string.Empty;
-        public string UserName
+        string _username = string.Empty;
+        public string Username
         {
-            get => _userName;
-            set => Set(ref _userName, value);
+            get => _username;
+            set => Set(ref _username, value);
         }
 
-        string _nickName = string.Empty;
-        public string NickName
+        string _nickname = string.Empty;
+        public string Nickname
         {
-            get => _nickName;
-            set => Set(ref _nickName, value);
+            get => _nickname;
+            set => Set(ref _nickname, value);
         }
 
         string _phone = string.Empty;
@@ -187,7 +197,11 @@ namespace FlowChatApp.Model
 
         async Task<ImageSource> LoadAvatar()
         {
-            var response = await ChatService.GetAvator(UserName);
+            if(string.IsNullOrEmpty(HeadUrl))
+            {
+                return null;
+            }
+            var response = await ChatService.GetAvator(Username);
             if (response.Ok && response.Data != null)
             {
                 return GenImageSource(response.Data);

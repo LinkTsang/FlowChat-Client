@@ -80,7 +80,7 @@ namespace FlowChatApp.Service.Tests
             var signInResult = await chatService.SignInAsync("test1", "123");
             Assert.IsTrue(signInResult.Ok);
 
-            var getContactsResult = await chatService.GetContacts();
+            var getContactsResult = await chatService.GetContracts();
             Assert.IsTrue(getContactsResult.Ok);
             var contracts = getContactsResult.Data;
             Trace.WriteLine(ObjectDumper.Dump(contracts));
@@ -127,6 +127,18 @@ namespace FlowChatApp.Service.Tests
             Assert.IsTrue(getUserInfoResult.Ok);
             var user = getUserInfoResult.Data;
             Trace.WriteLine(ObjectDumper.Dump(user));
+        }
+
+        [TestMethod()]
+        public async Task SendPrivateChatMessageTest()
+        {
+            var chatService = new ChatService("http://127.0.0.1:8081");
+
+            var signInResult = await chatService.SignInAsync("test1", "123");
+            Assert.IsTrue(signInResult.Ok);
+
+            var result = await chatService.SendMessage("test2", "haha");
+            Assert.IsTrue(result.Ok);
         }
 
         [TestMethod()]

@@ -1,24 +1,56 @@
 ﻿<UserControl x:Class="FlowChatApp.View.ChatListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:FlowChatApp.View"
              xmlns:model="clr-namespace:FlowChatApp.Model"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="200"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="200"
              d:DataContext="{Binding Path=Chat, Source={StaticResource Locator}}">
     <UserControl.Resources>
+        <DataTemplate DataType="{x:Type model:SystemChat}">
+            <Grid Width="180">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="0"
+                       Margin="2"
+                       Width="50"
+                       Height="50"
+                       Stretch="UniformToFill"
+                       Source="{Binding Avatar}"></Image>
+                <StackPanel Grid.Column="1"
+                            Margin="2">
+                    <TextBlock Margin="2"
+                               Text="System" />
+                    <TextBlock Margin="2"
+                               Text="{Binding RecentMessage.Content}"
+                               Foreground="Gray" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type model:PrivateChat}">
             <Grid Width="180">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="60"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Image Grid.Column="0" Margin="2" Width="50" Height="50" Stretch="UniformToFill" Source="{Binding Contract.User.Avatar}"></Image>
-                <StackPanel Grid.Column="1" Margin="2">
-                    <TextBlock Margin="2" Text="{Binding PeerName}" />
-                    <TextBlock Margin="2" Text="{Binding RecentMessage.Content}" Foreground="Gray" />
+                <Image Grid.Column="0"
+                       Margin="2"
+                       Width="50"
+                       Height="50"
+                       Stretch="UniformToFill"
+                       Source="{Binding Contract.User.Avatar}"></Image>
+                <StackPanel Grid.Column="1"
+                            Margin="2">
+                    <TextBlock Margin="2"
+                               Text="{Binding PeerName}" />
+                    <TextBlock Margin="2"
+                               Text="{Binding RecentMessage.Content}"
+                               Foreground="Gray" />
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -28,22 +60,30 @@
                     <ColumnDefinition Width="60"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Image Grid.Column="0" Margin="2" Width="50" Height="50" Stretch="UniformToFill" Source="{Binding Group.Avatar}"></Image>
-                <StackPanel Grid.Column="1" Margin="2">
-                    <TextBlock Margin="2" Text="{Binding Group.Name}" />
-                    <WrapPanel Margin="2" >
-                        <TextBlock Foreground="Gray" Text="{Binding RecentMessage.Sender.NickName }"  />
-                        <TextBlock Foreground="Gray" Text=": "/>
-                        <TextBlock Foreground="Gray" Text="{Binding RecentMessage.Content}"  />
+                <Image Grid.Column="0"
+                       Margin="2"
+                       Width="50"
+                       Height="50"
+                       Stretch="UniformToFill"
+                       Source="{Binding Group.Avatar}"></Image>
+                <StackPanel Grid.Column="1"
+                            Margin="2">
+                    <TextBlock Margin="2"
+                               Text="{Binding Group.Name}" />
+                    <WrapPanel Margin="2">
+                        <TextBlock Foreground="Gray"
+                                   Text="{Binding RecentMessage.Sender.Nickname }" />
+                        <TextBlock Foreground="Gray"
+                                   Text=": " />
+                        <TextBlock Foreground="Gray"
+                                   Text="{Binding RecentMessage.Content}" />
                     </WrapPanel>
                 </StackPanel>
             </Grid>
-            
         </DataTemplate>
     </UserControl.Resources>
     <ListView ItemsSource="{Binding Chats}"
               SelectedItem="{Binding CurrentChat}"
               BorderThickness="0"
-              Background="{x:Null}">
-    </ListView>
+              Background="{x:Null}"></ListView>
 </UserControl>

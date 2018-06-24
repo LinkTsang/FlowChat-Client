@@ -23,6 +23,14 @@ namespace FlowChatApp.Model
             _owner = owner;
         }
 
+        public void MergeFrom(string name, ObservableCollection<User> members)
+        {
+            Name = name;
+            Members.Clear();
+            foreach(var m in members) {
+                Members.Add(m);
+            }
+        }
         long _id = 0;
         public long Id
         {

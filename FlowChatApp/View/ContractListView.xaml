@@ -15,7 +15,7 @@
                 <WrapPanel>
                     <Image Width="50" Height="50" Source="{Binding User.Avatar}"/>
                     <StackPanel>
-                        <TextBlock Text="{Binding User.NickName}" TextWrapping="NoWrap"/>
+                        <TextBlock Text="{Binding User.Nickname}" TextWrapping="NoWrap"/>
                         <TextBlock Text="{Binding User.Status}" />
                     </StackPanel>
                 </WrapPanel>
@@ -29,7 +29,7 @@
                         <WrapPanel>
                             <TextBlock Text="{Binding Alias}" TextWrapping="NoWrap"/>
                             <TextBlock Foreground="Gray" Text=" ("/>
-                            <TextBlock Foreground="Gray" Text="{Binding User.NickName}" TextWrapping="NoWrap"/>
+                            <TextBlock Foreground="Gray" Text="{Binding User.Nickname}" TextWrapping="NoWrap"/>
                             <TextBlock Foreground="Gray" Text=") "/>
                         </WrapPanel>
                         <TextBlock Text="{Binding User.Status}" />

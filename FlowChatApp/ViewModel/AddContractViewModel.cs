@@ -7,9 +7,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommonServiceLocator;
 using FlowChatApp.Model;
+using FlowChatApp.Service;
 using FlowChatApp.Service.Interface;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using MaterialDesignThemes.Wpf;
 
 namespace FlowChatApp.ViewModel
 {
@@ -29,7 +31,7 @@ namespace FlowChatApp.ViewModel
 
         async void SetUpDesignData()
         {
-            (await ServiceLocator.Current.GetInstance<IChatService>().GetContacts()).Data.ForEach(c => Users.Add(c.User));
+            (await ServiceLocator.Current.GetInstance<IChatService>().GetContracts()).Data.ForEach(c => Users.Add(c.User));
         }
         string _searchText;
 
@@ -54,9 +56,14 @@ namespace FlowChatApp.ViewModel
         }
 
         public RelayCommand<User> AddCommand { get; }
-        async void AddUser(User User)
+        AddContractMessageViewModel AddContractMessageViewModel => ServiceLocator.Current.GetInstance<AddContractMessageViewModel>();
+        IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
+
+        async void AddUser(User user)
         {
-            await ChatService.AddContact(User.UserName, "", "Hello");
+            AddContractMessageViewModel.User = user;
+            AddContractMessageViewModel.Message = string.Empty;
+            WindowService.ShowAddContractWindow();
         }
 
         public RelayCommand SearchCommand { get; }
@@ -64,7 +71,7 @@ namespace FlowChatApp.ViewModel
         {
             var results = (await ChatService.SearchUser(SearchType.ByUserName, SearchText)).Data;
             Users.Clear();
-            results.ForEach(g => Users.Add(g));
+            results?.ForEach(g => Users.Add(g));
         }
     }
 }

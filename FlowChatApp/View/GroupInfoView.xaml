@@ -53,10 +53,10 @@
                         </GridViewColumn>
 
                         <GridViewColumn
-                            DisplayMemberBinding="{Binding UserName}"
+                            DisplayMemberBinding="{Binding Username}"
                             Header="UserName" />
                         <GridViewColumn
-                            DisplayMemberBinding="{Binding NickName}"
+                            DisplayMemberBinding="{Binding Nickname}"
                             Header="NickName" />
                     </GridView>
                 </ListView.View>

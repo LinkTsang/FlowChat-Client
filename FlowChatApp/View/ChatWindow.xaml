@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:FlowChatApp.ViewModel"
+        xmlns:model="clr-namespace:FlowChatApp.Model"
         Title="FlowChat"
         Height="540"
         Width="960"
@@ -34,6 +35,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ErrorMessageViewModel}">
             <local:ErrorMessageView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InvationListViewModel}">
+            <local:InvationListView />
         </DataTemplate>
         <Style TargetType="TabItem">
             <Setter Property="Template">
@@ -90,11 +94,11 @@
                     </Button>
                     <WrapPanel HorizontalAlignment="Center"
                                Margin="0,10,0,10">
-                        <TextBlock Text="{Binding CurrentAccount.UserName}" />
+                        <TextBlock Text="{Binding CurrentAccount.Username}" />
                         <TextBlock Foreground="Gray"
                                    Text=" (" />
                         <TextBlock Foreground="Gray"
-                                   Text="{Binding CurrentAccount.NickName}" />
+                                   Text="{Binding CurrentAccount.Nickname}" />
                         <TextBlock Foreground="Gray"
                                    Text=") " />
                     </WrapPanel>

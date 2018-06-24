@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="FlowChatApp.View.InvationListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:FlowChatApp.View"
+             xmlns:m="clr-namespace:FlowChatApp.Model"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="400"
+             d:DataContext="{Binding Path=InvationList, Source={StaticResource Locator}}"
+             DataContext="{Binding Path=InvationList, Source={StaticResource Locator}}">
+    <UserControl.Resources>
+        <DataTemplate x:Key="ContractInvationTemplate"
+                      DataType="{x:Type m:ContractInvation}">
+            <ContentControl>
+                <WrapPanel>
+                    <Image Width="50"
+                           Height="50"
+                           Source="{Binding User.Avatar}" />
+                    <StackPanel>
+                        <TextBlock Text="{Binding User.Username}"
+                                   TextWrapping="NoWrap" />
+                        <TextBlock Text="{Binding Message}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Margin="0 5 10 5">ACCEPT</Button>
+                            <Button Margin="0 5 10 5">REJECT</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </WrapPanel>
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <ListView ItemsSource="{Binding Invations}"
+                  BorderThickness="0"
+                  Background="{x:Null}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding}">
+                        <ContentControl.Style>
+                            <Style TargetType="{x:Type ContentControl}">
+                                <Setter Property="ContentTemplate"
+                                        Value="{StaticResource ContractInvationTemplate}" />
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</UserControl>

@@ -15,7 +15,7 @@ namespace FlowChatApp.Model
 
         }
         public Account(User user)
-            : this(user.Id, user.Email, user.UserName, user.NickName, user.Region, user.Phone, user.Status, user.Gender, user.HeadUrl)
+            : this(user.Id, user.Email, user.Username, user.Nickname, user.Region, user.Phone, user.Status, user.Gender, user.HeadUrl)
         {
         }
         public Account(long id, string email, string username, string nickname,

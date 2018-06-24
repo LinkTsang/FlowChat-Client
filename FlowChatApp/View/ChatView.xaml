@@ -26,7 +26,7 @@
                        Source="{Binding Sender.Avatar}"/>
                 <StackPanel Margin="2" Grid.Column="1">
                     <WrapPanel Margin="0,5,0,5">
-                        <TextBlock Text="{Binding Sender.NickName}"/>
+                        <TextBlock Text="{Binding Sender.Nickname}"/>
                         <TextBlock Text="  "/>
                         <TextBlock Text="{Binding Time}"/>
                     </WrapPanel>
@@ -61,7 +61,7 @@
                     <WrapPanel Margin="0,5,0,5">
                         <TextBlock Text="{Binding Time}"/>
                         <TextBlock Text="  "/>
-                        <TextBlock Text="{Binding Sender.NickName}"/>
+                        <TextBlock Text="{Binding Sender.Nickname}"/>
                     </WrapPanel>
                     <md:Card Background="{DynamicResource PrimaryHueMidBrush}" 
                              Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"

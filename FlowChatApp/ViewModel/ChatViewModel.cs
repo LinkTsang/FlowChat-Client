@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FlowChatApp.ViewModel
 {
@@ -44,7 +45,14 @@ namespace FlowChatApp.ViewModel
             get => _currentChat;
             set
             {
-                CurrentContentViewModel = this;
+                if (value == _systemChat)
+                {
+                    CurrentContentViewModel = InvationListViewModel;
+                }
+                else
+                {
+                    CurrentContentViewModel = this;
+                }
                 Set(ref _currentChat, value);
             }
         }
@@ -76,6 +84,8 @@ namespace FlowChatApp.ViewModel
                 CurrentContentViewModel = ViewModelLocator.GroupInfo;
             }
         }
+
+        public InvationListViewModel InvationListViewModel => ServiceLocator.Current.GetInstance<InvationListViewModel>();
 
         Account _account;
         public Account CurrentAccount
@@ -119,10 +129,10 @@ namespace FlowChatApp.ViewModel
         {
             var chat = Chats
                 .OfType<PrivateChat>()
-                .FirstOrDefault(c => c.Contract.User.UserName == username);
+                .FirstOrDefault(c => c.Contract.User.Username == username);
             if (chat == null)
             {
-                var contract = Contracts.FirstOrDefault(c => c.User.UserName == username);
+                var contract = Contracts.FirstOrDefault(c => c.User.Username == username);
                 chat = new PrivateChat(contract);
             }
             return chat;
@@ -140,12 +150,22 @@ namespace FlowChatApp.ViewModel
             }
             return chat;
         }
+
+        SystemChat _systemChat = new SystemChat();
         async void SetUpData()
         {
+            Chats.Add(_systemChat);
+            CurrentChat = _systemChat;
+            InvationListViewModel.Invations.Clear();
+            var contractInvationsResult = await ChatService.GetContractInvations();
+            var invations = contractInvationsResult.Data;
+            invations?.ForEach(i => InvationListViewModel.Invations.Add(i));
+
+
             var result = await ChatService.GetAccountInfo();
             CurrentAccount = result.Data;
 
-            var contracts = (await ChatService.GetContacts()).Data;
+            var contracts = (await ChatService.GetContracts()).Data;
             contracts.ForEach(c => Contracts.Add(c));
 
             var groups = (await ChatService.GetGroups()).Data;
@@ -154,25 +174,20 @@ namespace FlowChatApp.ViewModel
             var chats = (await ChatService.GetChatHistory()).Data;
             chats.ForEach(c => Chats.Add(c));
 
-            ChatService.ChatMessageReceived += (sender, message) =>
+            ChatService.PrivateChatMessageReceived += (sender, message) =>
             {
-                switch (message)
-                {
-                    case PrivateMessage m:
-                        {
-                            var peerName = m.Sender.UserName == CurrentAccount.UserName
-                                ? m.Receiver.UserName
-                                : m.Sender.UserName;
-                            GetPrivateChat(peerName).AddMessage(m);
-                        }
-                        break;
-                    case GroupMessage m:
-                        {
-                            GetGroupChat(m.Group.Id).AddMessage(m);
-                        }
-                        break;
-                }
+                var peerName = message.Sender.Username == CurrentAccount.Username
+                     ? message.Receiver.Username
+                     : message.Sender.Username;
+                GetPrivateChat(peerName).AddMessage(message);
             };
+
+            ChatService.GroupChatMessageReceived += (sender, message) =>
+            {
+                GetGroupChat(message.Group.Id).AddMessage(message);
+            };
+
+            ChatService.Handle();
         }
 
         AccountInfoViewModel AccountInfoViewModel => ServiceLocator.Current.GetInstance<AccountInfoViewModel>();
@@ -201,12 +216,14 @@ namespace FlowChatApp.ViewModel
             {
                 case PrivateChat c:
                     {
-                        ChatService.SendMessage(c.Contract.User.UserName, ContentToSend);
+                        ChatService.SendMessage(c.Contract.User.Username, ContentToSend);
+                        CurrentChat.AddMessage(new PrivateMessage(-1, DateTime.Now, CurrentAccount, c.Contract.User, ContentToSend));
                     }
                     break;
                 case GroupChat c:
                     {
                         ChatService.SendGroupMessage(c.Group.Id, ContentToSend);
+                        // CurrentChat.AddMessage(new GroupMessage(-1, DateTime.Now, CurrentAccount, c.Group, ContentToSend));
                     }
                     break;
             }
@@ -218,9 +235,8 @@ namespace FlowChatApp.ViewModel
 
         void AddContract()
         {
-            WindowService.ShowDialog(AddContractViewModel, p =>
+            WindowService.ShowDialog(AddContractViewModel, _ =>
             {
-               
 
             });
         }
@@ -229,12 +245,8 @@ namespace FlowChatApp.ViewModel
 
         void AddGroup()
         {
-            WindowService.ShowDialog(AddGroupViewModel, p =>
+            WindowService.ShowDialog(AddGroupViewModel, _ =>
             {
-                if (p == null)
-                {
-                    
-                }
             });
         }
         IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();

@@ -1,4 +1,5 @@
 ﻿using FlowChatApp.Service.Interface;
+using FlowChatApp.View;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using System;
@@ -40,5 +41,23 @@ namespace FlowChatApp.Service
         }
 
 
+
+        AddContractMessageView _addContractMessageView;
+        public void ShowAddContractWindow()
+        {
+            if (_addContractMessageView == null)
+            {
+                _addContractMessageView = new AddContractMessageView();
+            }
+            _addContractMessageView.Show();
+        }
+
+        public void CloseAddContractWindow()
+        {
+            if (_addContractMessageView != null)
+            {
+                _addContractMessageView.Hide();
+            }
+        }
     }
 }

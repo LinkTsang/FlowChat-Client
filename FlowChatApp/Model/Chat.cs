@@ -1,4 +1,7 @@
-﻿using FlowChatApp.ViewModel;
+﻿using CommonServiceLocator;
+using FlowChatApp.Service.Interface;
+using FlowChatApp.Utility;
+using FlowChatApp.ViewModel;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using Newtonsoft.Json;
@@ -8,14 +11,15 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace FlowChatApp.Model
 {
     public class ChatMessage : ObservableObject
     {
+        protected IChatService ChatService => ServiceLocator.Current.GetInstance<IChatService>();
         public ChatMessage()
         {
-
         }
         public ChatMessage(long id, DateTime time, User sender, string content)
         {
@@ -42,8 +46,15 @@ namespace FlowChatApp.Model
         User _sender;
         public User Sender
         {
-            get => _sender;
-            set => Set(ref _sender, value);
+            get
+            {
+                return _sender;
+            }
+            set
+            {
+                Set(ref _sender, value);
+                RaisePropertyChanged(nameof(IsCurrentAccount));
+            }
         }
 
         string _senderName;
@@ -73,7 +84,8 @@ namespace FlowChatApp.Model
             get
             {
                 var main = SimpleIoc.Default.GetInstance<ChatViewModel>();
-                if (main.CurrentAccount == null) {
+                if (main.CurrentAccount == null || Sender == null)
+                {
                     return false;
                 }
                 return main.CurrentAccount.Id == Sender.Id;
@@ -95,7 +107,10 @@ namespace FlowChatApp.Model
         User _receiver;
         public User Receiver
         {
-            get => _receiver;
+            get
+            {
+                return _receiver;
+            }
             set => Set(ref _receiver, value);
         }
 
@@ -122,7 +137,10 @@ namespace FlowChatApp.Model
         Group _group;
         public Group Group
         {
-            get => _group;
+            get
+            {
+                return _group;
+            }
             set => Set(ref _group, value);
         }
 
@@ -161,7 +179,7 @@ namespace FlowChatApp.Model
 
         public override string PeerName
         {
-            get => Contract.User.NickName;
+            get => Contract.User.Nickname;
         }
         public PrivateChat()
         {
@@ -239,5 +257,14 @@ namespace FlowChatApp.Model
         {
             Messages.Add((GroupMessage)message);
         }
+    }
+    
+    public class SystemChat : Chat
+    {
+        public override void AddMessage(ChatMessage message)
+        {
+        }
+
+        public ImageSource Avatar => User.DefaultAvatarImage;
     }
 }

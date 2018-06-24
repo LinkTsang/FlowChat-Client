@@ -6,17 +6,24 @@
              xmlns:local="clr-namespace:FlowChatApp.View"
              xmlns:model="clr-namespace:FlowChatApp.Model"
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:FlowChatApp.ViewModel"
              mc:Ignorable="d"
              Height="450"
              Width="300"
              d:DesignHeight="450"
              d:DesignWidth="300"
-             d:DataContext="{Binding Path=AddContract, Source={StaticResource Locator}}">
-    <UserControl.Resources></UserControl.Resources>
+             d:DataContext="{Binding Path=AddContract, Source={StaticResource Locator}}"
+             DataContext="{Binding Path=AddContract, Source={StaticResource Locator}}">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type vm:AddContractMessageViewModel}">
+            <local:AddContractMessageView />
+        </DataTemplate>
+    </UserControl.Resources>
     <md:DialogHost HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch">
+                   VerticalAlignment="Stretch"
+                   CloseOnClickAway="True">
         <md:DialogHost.DialogContent>
-            <ContentControl />
+            <ContentControl Content="{Binding}" />
         </md:DialogHost.DialogContent>
         <Grid>
             <Grid.RowDefinitions>
@@ -59,60 +66,16 @@
                                        Source="{Binding Avatar}" />
                                 <TextBlock VerticalAlignment="Center"
                                            Margin="5"
-                                           Text="{Binding UserName}"
+                                           Text="{Binding Username}"
                                            TextWrapping="NoWrap" />
                             </StackPanel>
                             <Button Grid.Column="1"
                                     Margin="0"
                                     HorizontalAlignment="Right"
                                     Style="{StaticResource MaterialDesignFlatButton}"
-                                    Command="{x:Static md:DialogHost.OpenDialogCommand}"
-                                    Content="ADD">
-                                <Button.CommandParameter>
-                                    <StackPanel Margin="16">
-                                        <StackPanel Margin="5"
-                                                    HorizontalAlignment="Stretch">
-                                            <Image Width="50"
-                                                   Height="50"
-                                                   Source="{Binding Avatar}" />
-                                            <TextBlock Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                                       FontSize="25"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       Margin="5"
-                                                       Text="{Binding UserName}"
-                                                       TextWrapping="NoWrap" />
-                                            <TextBlock Foreground="{DynamicResource PrimaryHueLightBrush}"
-                                                       FontSize="12"
-                                                       Text="{Binding Status}"
-                                                       HorizontalAlignment="Center" />
-                                        </StackPanel>
-                                        <TextBlock> Send a message:</TextBlock>
-                                        <TextBox Margin="0 8 0 0"
-                                                 HorizontalAlignment="Stretch"
-                                                 md:HintAssist.Hint="Hello, I'm..." />
-                                        <StackPanel Orientation="Horizontal"
-                                                    HorizontalAlignment="Right">
-                                            <Button Style="{StaticResource MaterialDesignFlatButton}"
-                                                    IsDefault="True"
-                                                    Margin="0 8 8 0"
-                                                    Command="md:DialogHost.CloseDialogCommand">
-                                                <Button.CommandParameter>
-                                                    <system:Boolean xmlns:system="clr-namespace:System;assembly=mscorlib">True</system:Boolean>
-                                                </Button.CommandParameter> OK
-                                            </Button>
-                                            <Button Style="{StaticResource MaterialDesignFlatButton}"
-                                                    IsCancel="True"
-                                                    Margin="0 8 8 0"
-                                                    Command="md:DialogHost.CloseDialogCommand">
-                                                <Button.CommandParameter>
-                                                    <system:Boolean xmlns:system="clr-namespace:System;assembly=mscorlib">False</system:Boolean>
-                                                </Button.CommandParameter> CANCEL
-                                            </Button>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Button.CommandParameter>
-                            </Button>
+                                    Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.AddCommand}"
+                                    CommandParameter="{Binding}"
+                                    Content="ADD" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

@@ -42,7 +42,8 @@ namespace FlowChatApp.Service
         {
             return _InvationId++;
         }
-        public event EventHandler<ChatMessage> ChatMessageReceived;
+        public event EventHandler<PrivateMessage> PrivateChatMessageReceived;
+        public event EventHandler<GroupMessage> GroupChatMessageReceived;
         public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
         public event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
         public event EventHandler<Result> BadRequestRaised;
@@ -92,7 +93,7 @@ namespace FlowChatApp.Service
                 ["fileUrl"] = fileUrl,
             };
             CurrentAccount.HeadUrl = fileUrl;
-            _avatarDict[CurrentAccount.UserName] = avator;
+            _avatarDict[CurrentAccount.Username] = avator;
             var result = new Result(ResultCode.Ok, "OK", jObject);
             return result;
         }
@@ -100,7 +101,7 @@ namespace FlowChatApp.Service
         #endregion
 
         #region contract
-        public async Task<Result<List<Contract>>> GetContacts()
+        public async Task<Result<List<Contract>>> GetContracts()
         {
             var result = new Result<List<Contract>>(ResultCode.Ok, "OK", Contracts);
             return result;
@@ -108,9 +109,9 @@ namespace FlowChatApp.Service
         public async Task<Result> AddContact(string username, string categoryName, string message)
         {
             var result = Result.BadRequest;
-            if (Contracts.FirstOrDefault(c => c.User.UserName == username) == null)
+            if (Contracts.FirstOrDefault(c => c.User.Username == username) == null)
             {
-                var user = Users.FirstOrDefault(u => u.UserName == username);
+                var user = Users.FirstOrDefault(u => u.Username == username);
                 if (user != null)
                 {
                     var invation = new ContractInvation(GenContractInvationId(), username, message);
@@ -123,7 +124,7 @@ namespace FlowChatApp.Service
         public async Task<Result> DeleteContact(string username)
         {
             var result = Result.BadRequest;
-            var contract = Contracts.FirstOrDefault(c => c.User.UserName == username);
+            var contract = Contracts.FirstOrDefault(c => c.User.Username == username);
             if (contract != null)
             {
                 Contracts.Remove(contract);
@@ -159,7 +160,7 @@ namespace FlowChatApp.Service
         public async Task<Result<User>> GetUserInfo(string username)
         {
             var result = Result<User>.ErrorMessage("BadRequest");
-            var user = Users.FirstOrDefault(u => u.UserName == username);
+            var user = Users.FirstOrDefault(u => u.Username == username);
             if (user != null)
             {
                 result = new Result<User>(ResultCode.Ok, "OK", user);
@@ -190,6 +191,11 @@ namespace FlowChatApp.Service
         {
             var result = new Result<byte[]>(ResultCode.Ok, "OK", _avatarDict[username]);
             return result;
+        }
+
+        public async Task<User> QueryUser(string username)
+        {
+            return (await GetUserInfo(username)).Data;
         }
         #endregion
 
@@ -234,7 +240,7 @@ namespace FlowChatApp.Service
         {
             var result = Result.BadRequest;
             var group = Groups.FirstOrDefault(g => g.Id == groupId);
-            var member = group.Members.FirstOrDefault(m => m.UserName == CurrentAccount.UserName);
+            var member = group.Members.FirstOrDefault(m => m.Username == CurrentAccount.Username);
             if (group != null && member == null)
             {
                 group.Members.Add(CurrentAccount);
@@ -258,7 +264,7 @@ namespace FlowChatApp.Service
         {
             var result = Result.BadRequest;
             var group = JoinedGroups.FirstOrDefault(g => g.Id == groupId);
-            var member = group.Members.FirstOrDefault(u => u.UserName == CurrentAccount.UserName);
+            var member = group.Members.FirstOrDefault(u => u.Username == CurrentAccount.Username);
             if (group != null && member != null)
             {
                 JoinedGroups.Remove(group);
@@ -271,10 +277,10 @@ namespace FlowChatApp.Service
         {
             var result = Result.BadRequest;
             var group = Groups.FirstOrDefault(g => g.Name == groupName);
-            var user = Users.FirstOrDefault(u => u.UserName == userName);
+            var user = Users.FirstOrDefault(u => u.Username == userName);
             if (group != null && user != null)
             {
-                if (!group.Members.Any(u => u.UserName == userName))
+                if (!group.Members.Any(u => u.Username == userName))
                 {
                     group.Members.Add(user);
                     result = Result.OKRequest;
@@ -286,6 +292,11 @@ namespace FlowChatApp.Service
         {
             var result = new Result<List<Group>>(ResultCode.Ok, "OK", Groups);
             return result;
+        }
+
+        public async Task<Group> QueryGroup(long groupId)
+        {
+            return (await GetGroup(groupId)).Data;
         }
         #endregion
 
@@ -306,15 +317,15 @@ namespace FlowChatApp.Service
                 }
                 var m0 = new GroupMessage(GenMessageId(), DateTime.Now, CurrentAccount, group, content);
                 chat.AddMessage(m0);
-                ChatMessageReceived?.Invoke(this, m0);
+                GroupChatMessageReceived?.Invoke(this, m0);
 
                 int i = 0;
-                var r = group.Members.Where(u => u.UserName != CurrentAccount.UserName);
+                var r = group.Members.Where(u => u.Username != CurrentAccount.Username);
                 foreach (var m in r)
                 {
                     var msg = new GroupMessage(GenMessageId(), DateTime.Now, m, group, $"{content} + {++i}");
                     chat.AddMessage(msg);
-                    ChatMessageReceived?.Invoke(this, msg);
+                    GroupChatMessageReceived?.Invoke(this, msg);
                 }
             }
             return result;
@@ -323,10 +334,10 @@ namespace FlowChatApp.Service
         public async Task<Result> SendMessage(string username, string content)
         {
             var result = Result.BadRequest;
-            var contract = Contracts.FirstOrDefault(c => c.User.UserName == username);
+            var contract = Contracts.FirstOrDefault(c => c.User.Username == username);
             if (contract != null)
             {
-                var chat = Chats.OfType<PrivateChat>().FirstOrDefault(c => c.Contract.User.UserName == username);
+                var chat = Chats.OfType<PrivateChat>().FirstOrDefault(c => c.Contract.User.Username == username);
                 if (chat == null)
                 {
                     chat = new PrivateChat(contract);
@@ -334,11 +345,11 @@ namespace FlowChatApp.Service
                 }
                 var m0 = new PrivateMessage(GenMessageId(), DateTime.Now, CurrentAccount, contract.User, content);
                 chat.AddMessage(m0);
-                ChatMessageReceived?.Invoke(this, m0);
+                PrivateChatMessageReceived?.Invoke(this, m0);
 
                 var m1 = new PrivateMessage(GenMessageId(), DateTime.Now, contract.User, CurrentAccount, $"I know you said: {content}");
                 chat.AddMessage(m1);
-                ChatMessageReceived?.Invoke(this, m1);
+                PrivateChatMessageReceived?.Invoke(this, m1);
             }
             return result;
         }
@@ -418,16 +429,16 @@ namespace FlowChatApp.Service
                 {
                     Id = GenUserId(),
                     Email = "jack@flowchat.com",
-                    UserName = "jack",
-                    NickName = "Jack",
+                    Username = "jack",
+                    Nickname = "Jack",
                     Gender = Gender.Unknown,
                     Status = "Hello World!",
                 },
                 new User() {
                     Id = GenUserId(),
                     Email = "mei@flowchat.com",
-                    UserName = "mei",
-                    NickName = "Mei",
+                    Username = "mei",
+                    Nickname = "Mei",
                     Gender = Gender.Girl,
                     Status = "Have Fun Coding!",
                     Phone = "1234567890",
@@ -437,8 +448,8 @@ namespace FlowChatApp.Service
                 {
                     Id = GenUserId(),
                     Email = "jimmy@flowchat.com",
-                    UserName = "jimmy",
-                    NickName = "jimmy",
+                    Username = "jimmy",
+                    Nickname = "jimmy",
                     Gender = Gender.Boy,
                     Status = "No Errors, No Bugs!"
                 },
@@ -446,17 +457,17 @@ namespace FlowChatApp.Service
                 {
                     Id = GenUserId(),
                     Email = "test@flowchat.com",
-                    UserName = "test",
-                    NickName = "test",
+                    Username = "test",
+                    Nickname = "test",
                     Gender = Gender.Boy,
                     Status = "test!"
                 }
             });
 
-            _avatarDict[Users[0].UserName] = LoadResource(User.DefaultBoyAvatar);
-            _avatarDict[Users[1].UserName] = LoadResource(User.DefaultAvatar);
-            _avatarDict[Users[2].UserName] = LoadResource(User.DefaultGirlAvatar);
-            _avatarDict[Users[3].UserName] = LoadResource(User.DefaultGirlAvatar);
+            _avatarDict[Users[0].Username] = LoadResource(User.DefaultBoyAvatar);
+            _avatarDict[Users[1].Username] = LoadResource(User.DefaultAvatar);
+            _avatarDict[Users[2].Username] = LoadResource(User.DefaultGirlAvatar);
+            _avatarDict[Users[3].Username] = LoadResource(User.DefaultGirlAvatar);
         }
 
         void SetUpGroups()
@@ -535,7 +546,7 @@ namespace FlowChatApp.Service
         void SetUpContractInvations()
         {
             contractInvations.AddRange(new[] {
-                new ContractInvation(GenContractInvationId(), Users[3].UserName, "HeyHey!")
+                new ContractInvation(GenContractInvationId(), Users[3].Username, "HeyHey!")
             });
         }
 
@@ -547,6 +558,11 @@ namespace FlowChatApp.Service
         public Task<Result<List<GroupChat>>> GetUnreadGroupChatHistory()
         {
             throw new NotImplementedException();
+        }
+
+        public void Handle()
+        {
+
         }
 
 

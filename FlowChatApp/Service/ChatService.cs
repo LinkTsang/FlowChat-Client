@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using FlowChatApp.Model;
 using FlowChatApp.Service.Interface;
 using Google.Protobuf;
@@ -21,12 +22,28 @@ namespace FlowChatApp.Service
 {
     public class ChatService : IChatService
     {
+        Dictionary<string, User> _userDict = new Dictionary<string, User>();
+        Dictionary<long, Group> _groupDict = new Dictionary<long, Group>();
+        Account _account;
+
+        public async Task<User> QueryUser(string username)
+        {
+
+            if (!_userDict.ContainsKey(username))
+            {
+                _userDict.Add(username, (await GetUserInfo(username)).Data);
+            }
+            return _userDict[username];
+        }
+
+
         public class TokenClass
         {
             public string Token { get; set; }
         }
         readonly HttpClient _httpClient;
         readonly TcpClient _tcpClient;
+        readonly DispatcherTimer _dispatcherTimer = new DispatcherTimer();
         string _token = string.Empty;
 
         readonly CancellationTokenSource _cts = new CancellationTokenSource();
@@ -57,23 +74,45 @@ namespace FlowChatApp.Service
             _tcpClient = new TcpClient();
 
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            _dispatcherTimer.Tick += DispatcherTimer_Tick;
+            _dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 5, 0);
         }
 
-        public async void Connect(IPAddress ipAddress, int port)
+        public void Handle()
         {
-            await _tcpClient.ConnectAsync(ipAddress, port);
-            new Task(ChatServiceLoop, _cts.Token, TaskCreationOptions.LongRunning).Start();
+            _dispatcherTimer.Start();
+        }
+
+        async void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            var unreadPrivateMessageResult = await GetUnreadPrivateChatHistory();
+            if (unreadPrivateMessageResult.Ok)
+            {
+                unreadPrivateMessageResult.Data.ForEach(c =>
+                {
+                    foreach (var chatMessage in c.Messages)
+                    {
+                        PrivateChatMessageReceived?.Invoke(this, chatMessage);
+                    }
+                });
+            }
+            var unreadGroupMessageResult = await GetUnreadGroupChatHistory();
+            if (unreadGroupMessageResult.Ok)
+            {
+                unreadGroupMessageResult.Data.ForEach(c =>
+                {
+                    foreach (var chatMessage in c.Messages)
+                    {
+                        GroupChatMessageReceived?.Invoke(this, chatMessage);
+                    }
+                });
+            }
         }
 
         void ChatServiceLoop()
         {
-            using (var networkStream = _tcpClient.GetStream())
-            {
-                while (!_cancellationToken.IsCancellationRequested)
-                {
 
-                }
-            }
 
         }
         async Task<Result> GetRequestImplAsync(string requestUri)
@@ -186,7 +225,8 @@ namespace FlowChatApp.Service
             return result;
         }
 
-        public event EventHandler<ChatMessage> ChatMessageReceived;
+        public event EventHandler<PrivateMessage> PrivateChatMessageReceived;
+        public event EventHandler<GroupMessage> GroupChatMessageReceived;
         public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
         public event EventHandler<Result> BadRequestRaised;
         public event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
@@ -231,7 +271,23 @@ namespace FlowChatApp.Service
         }
         public async Task<Result<Account>> GetAccountInfo()
         {
-            return await PostRequestAsync<Account>("/api/auth/searchAccoutInfo");
+            var result = await PostRequestAsync<Account>("/api/auth/searchAccoutInfo");
+            var account = result.Data;
+            if (result.Ok)
+            {
+                if (_userDict.ContainsKey(account.Username))
+                {
+                    account.MergeFrom(account);
+                    _account.MergeFrom(account);
+                }
+                else
+                {
+                    _userDict[account.Username] = account;
+                    _account = account;
+                }
+            }
+            result.Data = _account;
+            return result;
         }
         public async Task<Result> UploadAvator(string filename, byte[] avator)
         {
@@ -241,7 +297,7 @@ namespace FlowChatApp.Service
             multipartContent.Add(content, "file", filename);
             try
             {
-                var response = await _httpClient.PostAsync("/api/auth/uploadDownload/uploadImage", multipartContent, _cancellationToken);
+                var response = await _httpClient.PostAsync("/api/auth/uploadImage", multipartContent, _cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -268,7 +324,7 @@ namespace FlowChatApp.Service
         #endregion
 
         #region contract
-        public async Task<Result<List<Contract>>> GetContacts()
+        public async Task<Result<List<Contract>>> GetContracts()
         {
             var result = await PostRequestAsync("/api/auth/searchAllCategorys");
             if (result.HasError)
@@ -296,7 +352,15 @@ namespace FlowChatApp.Service
                 foreach (var member in categoryMemberInfos)
                 {
                     var user = member.ToObject<User>();
-                    var contract = new Contract(user, "", catetoryName);
+                    if (_userDict.ContainsKey(user.Username))
+                    {
+                        _userDict[user.Username].MergeFrom(user);
+                    }
+                    else
+                    {
+                        _userDict[user.Username] = user;
+                    }
+                    var contract = new Contract(_userDict[user.Username], "", catetoryName);
                     list.Add(contract);
                 }
             }
@@ -357,13 +421,13 @@ namespace FlowChatApp.Service
         }
         public async Task<Result<List<User>>> SearchUser(SearchType type, string value)
         {
-            return await GetRequestAsync<List<User>>($"/api/auth/findFriend?friendName={value}");
+            return await GetRequestAsync<List<User>>($"/api/auth/findUser?username={value}");
         }
         public async Task<Result<byte[]>> GetAvator(string username)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/auth/uploadDownload?userName={username}", _cancellationToken);
+                var response = await _httpClient.GetAsync($"/api/auth/downloadImage?userName={username}", _cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -461,7 +525,11 @@ namespace FlowChatApp.Service
                 return Result<Group>.ErrorMessage("Error");
             }
 
-            var g = new Group { Name = group["groupName"].Value<string>() };
+            var g = new Group
+            {
+                Name = group["groupName"].Value<string>(),
+                Id = groupId
+            };
             if (!(group["groupMemberInfos"] is JArray groupMemberInfos))
             {
                 return Result<Group>.ErrorMessage("Error");
@@ -534,7 +602,14 @@ namespace FlowChatApp.Service
             }
             return new Result<List<Group>>(ResultCode.Ok, "OK", list);
         }
-
+        public async Task<Group> QueryGroup(long groupId)
+        {
+            if (!_groupDict.ContainsKey(groupId))
+            {
+                _groupDict.Add(groupId, (await GetGroup(groupId)).Data);
+            }
+            return _groupDict[groupId];
+        }
         #endregion
 
         #region chat
@@ -558,12 +633,21 @@ namespace FlowChatApp.Service
                 var chats_ = response.Data as JObject;
                 foreach (var chat_ in chats_)
                 {
+                    var messages = chat_.Value.ToObject<List<PrivateMessage>>();
+                    if (messages.Count == 0)
+                    {
+                        continue;
+                    }
                     var peerName = chat_.Key;
-                    var peer = (await GetUserInfo(peerName)).Data;
+                    var peer = await QueryUser(peerName);
                     var contract = new Contract(peer);
                     var chat = new PrivateChat(contract);
-                    var messages = chat_.Value.ToObject<List<PrivateMessage>>();
-                    messages.ForEach(m => chat.Messages.Add(m));
+                    foreach (var m in messages)
+                    {
+                        m.Sender = await QueryUser(m.SenderName);
+                        m.Receiver = await QueryUser(m.ReceiverName);
+                        chat.Messages.Add(m);
+                    }
                     chats.Add(chat);
                 }
             }
@@ -580,12 +664,21 @@ namespace FlowChatApp.Service
                 var chats_ = response.Data as JObject;
                 foreach (var chat_ in chats_)
                 {
+                    var messages = chat_.Value.ToObject<List<PrivateMessage>>();
+                    if (messages.Count == 0)
+                    {
+                        continue;
+                    }
                     var peerName = chat_.Key;
-                    var peer = (await GetUserInfo(peerName)).Data;
+                    var peer = await QueryUser(peerName);
                     var contract = new Contract(peer);
                     var chat = new PrivateChat(contract);
-                    var messages = chat_.Value.ToObject<List<PrivateMessage>>();
-                    messages.ForEach(m => chat.Messages.Add(m));
+                    foreach (var m in messages)
+                    {
+                        m.Sender = await QueryUser(m.SenderName);
+                        m.Receiver = await QueryUser(m.ReceiverName);
+                        chat.Messages.Add(m);
+                    }
                     chats.Add(chat);
                 }
             }
@@ -612,11 +705,20 @@ namespace FlowChatApp.Service
                 var chats_ = response.Data as JArray;
                 foreach (var chat_ in chats_)
                 {
+                    var messages = chat_["messages"].ToObject<List<GroupMessage>>();
+                    if (messages.Count == 0)
+                    {
+                        continue;
+                    }
                     var groupId = chat_["groupId"].ToObject<int>();
                     var group = (await GetGroup(groupId)).Data;
                     var chat = new GroupChat(group);
-                    var messages = chat_["messages"].ToObject<List<GroupMessage>>();
-                    messages.ForEach(m => chat.Messages.Add(m));
+                    foreach (var m in messages)
+                    {
+                        m.Sender = await QueryUser(m.SenderName);
+                        m.Group = group;
+                        chat.Messages.Add(m);
+                    }
                     chats.Add(chat);
                 }
             }
@@ -633,11 +735,20 @@ namespace FlowChatApp.Service
                 var chats_ = response.Data as JArray;
                 foreach (var chat_ in chats_)
                 {
+                    var messages = chat_["messages"].ToObject<List<GroupMessage>>();
+                    if (messages.Count == 0)
+                    {
+                        continue;
+                    }
                     var groupId = chat_["groupId"].ToObject<int>();
                     var group = (await GetGroup(groupId)).Data;
                     var chat = new GroupChat(group);
-                    var messages = chat_["messages"].ToObject<List<GroupMessage>>();
-                    messages.ForEach(m => chat.Messages.Add(m));
+                    foreach (var m in messages)
+                    {
+                        m.Sender = await QueryUser(m.SenderName);
+                        m.Group = group;
+                        chat.Messages.Add(m);
+                    }
                     chats.Add(chat);
                 }
             }
@@ -645,7 +756,16 @@ namespace FlowChatApp.Service
         }
         public async Task<Result<List<Chat>>> GetChatHistory()
         {
-            throw new NotImplementedException();
+            var chats = new List<Chat>();
+
+            var privateChats = (await GetPrivateChatHistory()).Data;
+            chats.AddRange(privateChats);
+
+            var groupChats = (await GetGroupChatHistory()).Data;
+            chats.AddRange(groupChats);
+
+            var result = new Result<List<Chat>>(ResultCode.Ok, "OK", chats);
+            return result;
         }
         #endregion
     }

@@ -85,6 +85,13 @@ namespace FlowChatApp.Model
             set => Set(ref _message, value);
         }
 
+        User _user;
+        public User User
+        {
+            get => _user;
+            set => Set(ref _user, value);
+        }
+
     }
 
     public class InvationConfirmation : ViewModelBase

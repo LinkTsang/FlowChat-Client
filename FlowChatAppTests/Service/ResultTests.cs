@@ -62,7 +62,7 @@ namespace FlowChatApp.Service.Tests
             var account = new Account()
             {
                 Email = "test@flowchat.com",
-                UserName = "test",
+                Username = "test",
                 Password = "123456"
             };
             var result = JsonConvert.SerializeObject(account, _settings);

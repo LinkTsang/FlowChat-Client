@@ -40,7 +40,7 @@ namespace FlowChatApp.ViewModel
             var chat = ServiceLocator.Current.GetInstance<ChatViewModel>();
             var result = chat.Chats
                 .OfType<PrivateChat>()
-                .FirstOrDefault(c => c.Contract.User.UserName == curentContract.User.UserName);
+                .FirstOrDefault(c => c.Contract.User.Username == curentContract.User.Username);
             if(result == null)
             {
                 var c = new PrivateChat(curentContract);

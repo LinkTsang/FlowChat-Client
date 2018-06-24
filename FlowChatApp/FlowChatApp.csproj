@@ -132,17 +132,25 @@
     <Compile Include="Utility\DispatcherFetcher.cs" />
     <Compile Include="ViewModel\AddGroupViewModel.cs" />
     <Compile Include="ViewModel\ErrorMessageViewModel.cs" />
+    <Compile Include="ViewModel\InvationListViewModel.cs" />
     <Compile Include="ViewModel\LoginViewModel.cs" />
     <Compile Include="ViewModel\AddContractViewModel.cs" />
     <Compile Include="ViewModel\SearchViewModel.cs" />
     <Compile Include="ViewModel\SignUpViewModel.cs" />
     <Compile Include="ViewModel\GroupInfoViewModel.cs" />
     <Compile Include="ViewModel\AccountInfoViewModel.cs" />
+    <Compile Include="ViewModel\AddContractMessageViewModel.cs" />
+    <Compile Include="View\AddContractMessageView.xaml.cs">
+      <DependentUpon>AddContractMessageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\AddContractView.xaml.cs">
       <DependentUpon>AddContractView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\AddGroupView.xaml.cs">
       <DependentUpon>AddGroupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\InvationListView.xaml.cs">
+      <DependentUpon>InvationListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\ErrorMessageView.xaml.cs">
       <DependentUpon>ErrorMessageView.xaml</DependentUpon>
@@ -171,6 +179,10 @@
     <Compile Include="View\UserInfoView.xaml.cs">
       <DependentUpon>UserInfoView.xaml</DependentUpon>
     </Compile>
+    <Page Include="View\AddContractMessageView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\AddContractView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -186,6 +198,10 @@
     <Page Include="View\ChatListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\InvationListView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\ErrorMessageView.xaml">
       <SubType>Designer</SubType>
