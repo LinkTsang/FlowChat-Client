@@ -28,12 +28,7 @@ namespace FlowChatApp.Service
 
         public async Task<User> QueryUser(string username)
         {
-
-            if (!_userDict.ContainsKey(username))
-            {
-                _userDict.Add(username, (await GetUserInfo(username)).Data);
-            }
-            return _userDict[username];
+            return (await GetUserInfo(username)).Data;
         }
 
 
@@ -73,9 +68,10 @@ namespace FlowChatApp.Service
             };
             _tcpClient = new TcpClient();
 
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            // _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             _dispatcherTimer.Tick += DispatcherTimer_Tick;
+            // _dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 100);
             _dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 5, 0);
         }
 
@@ -107,6 +103,17 @@ namespace FlowChatApp.Service
                         GroupChatMessageReceived?.Invoke(this, chatMessage);
                     }
                 });
+            }
+            var getContractInvationsResult = await GetContractInvations();
+            if (getContractInvationsResult.Ok && getContractInvationsResult.Data.Count != 0)
+            {
+                ContactRequestMessagesUpdated?.Invoke(this, getContractInvationsResult.Data);
+            }
+
+            var getInvationConfirmationsResult = await GetInvationConfirmations();
+            if (getInvationConfirmationsResult.Ok)
+            {
+                ContactConfirmationMessageReceived?.Invoke(this, getInvationConfirmationsResult.Data);
             }
         }
 
@@ -225,11 +232,65 @@ namespace FlowChatApp.Service
             return result;
         }
 
+        User MergeUserInfo(User user)
+        {
+            if (user == null)
+            {
+                return null;
+            }
+            if (_userDict.ContainsKey(user.Username))
+            {
+                _userDict[user.Username].MergeFrom(user);
+            }
+            else
+            {
+                _userDict[user.Username] = user;
+            }
+            return _userDict[user.Username];
+        }
+
+        Group MergeGroupInfo(Group group)
+        {
+            if (_groupDict.ContainsKey(group.Id))
+            {
+                var g = _groupDict[group.Id];
+                g.Name = group.Name;
+                g.Owner = MergeUserInfo(group.Owner);
+                g.Members.Clear();
+                foreach (var m in group.Members)
+                {
+                    g.Members.Add(MergeUserInfo(m));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < group.Members.Count; i++)
+                {
+                    User m = group.Members[i];
+                    group.Members[i] = MergeUserInfo(m);
+                }
+                _groupDict[group.Id] = group;
+            }
+            return _groupDict[group.Id];
+        }
+        Account MergeAccountInfo(Account account)
+        {
+            MergeUserInfo(account);
+            if (_account == null)
+            {
+                _account = account;
+            }
+            else
+            {
+                _account.MergeFrom(account);
+            }
+            return _account;
+        }
         public event EventHandler<PrivateMessage> PrivateChatMessageReceived;
         public event EventHandler<GroupMessage> GroupChatMessageReceived;
-        public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
+        public event EventHandler<List<ContractInvation>> ContactRequestMessagesUpdated;
+        public event EventHandler<List<ContractInvation>> ContactConfirmationMessageReceived;
         public event EventHandler<Result> BadRequestRaised;
-        public event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
 
         #region account
         public async Task<Result> SignUpAsync(string email, string username, string nickname, string password)
@@ -267,7 +328,14 @@ namespace FlowChatApp.Service
         }
         public async Task<Result<Account>> UpdateAccountInfo(Account account)
         {
-            return await PostRequestAsync<Account>("/api/auth/modifyAccountInfo", JObject.FromObject(account));
+            var result = await PostRequestAsync<Account>("/api/auth/modifyAccountInfo", JObject.FromObject(account));
+            if (result.Ok && result.Data != null)
+            {
+                // FIXME
+                result.Data.Username = account.Username;
+                result.Data = MergeAccountInfo(result.Data);
+            }
+            return result;
         }
         public async Task<Result<Account>> GetAccountInfo()
         {
@@ -275,16 +343,7 @@ namespace FlowChatApp.Service
             var account = result.Data;
             if (result.Ok)
             {
-                if (_userDict.ContainsKey(account.Username))
-                {
-                    account.MergeFrom(account);
-                    _account.MergeFrom(account);
-                }
-                else
-                {
-                    _userDict[account.Username] = account;
-                    _account = account;
-                }
+                result.Data = MergeAccountInfo(result.Data);
             }
             result.Data = _account;
             return result;
@@ -351,16 +410,8 @@ namespace FlowChatApp.Service
                 }
                 foreach (var member in categoryMemberInfos)
                 {
-                    var user = member.ToObject<User>();
-                    if (_userDict.ContainsKey(user.Username))
-                    {
-                        _userDict[user.Username].MergeFrom(user);
-                    }
-                    else
-                    {
-                        _userDict[user.Username] = user;
-                    }
-                    var contract = new Contract(_userDict[user.Username], "", catetoryName);
+                    var user = MergeUserInfo(member.ToObject<User>());
+                    var contract = new Contract(user, "", catetoryName);
                     list.Add(contract);
                 }
             }
@@ -378,38 +429,44 @@ namespace FlowChatApp.Service
         }
         public async Task<Result> DeleteContact(string friendName)
         {
-            var jObject = new JObject()
-            {
-                ["friendName"] = friendName,
-            };
-            return await PostRequestAsync("/api/auth/deleteFriend", jObject);
+            return await GetRequestAsync($"/api/auth/deleteFriend?friendName={friendName}");
         }
         public async Task<Result> UpdateContact(string username, string alias)
         {
-            var jObject = new JObject()
-            {
-                ["aliaName"] = alias,
-                ["friendName"] = username
-            };
-            return await PostRequestAsync("/api/auth/modifyAliaName", jObject);
+            return await GetRequestAsync($"/api/auth/modifyAliaName?aliaName={alias}&friendName={username}");
         }
         public async Task<Result<List<ContractInvation>>> GetContractInvations()
         {
-            return await PostRequestAsync<List<ContractInvation>>("/api/auth/searchcontactinvation");
-        }
-        public async Task<Result> ConfirmContractInvation(string recordId, string categoryName, bool accept)
-        {
-            var jObject = new JObject()
+            var result = await PostRequestAsync<List<ContractInvation>>("/api/auth/searchcontactinvation");
+            if (result.Ok)
             {
-                ["recordId"] = recordId,
-                ["categoryName"] = categoryName,
-                ["type"] = accept ? 0 : 1
-            };
-            return await PostRequestAsync("/api/auth/confirmcontactinvation", jObject);
+                foreach (var c in result.Data)
+                {
+                    c.User = await QueryUser(c.FriendName);
+                }
+            }
+            return result;
+        }
+        public async Task<Result> ConfirmContractInvation(long recordId, string categoryName, bool accept)
+        {
+            int type = accept ? 0 : 1;
+            var result = await GetRequestAsync($"/api/auth/confirmcontactinvation" +
+                $"?recordId={recordId}" +
+                $"&categoryName={categoryName}" +
+                $"&type={type}");
+            return result;
         }
         public async Task<Result<List<ContractInvation>>> GetInvationConfirmations()
         {
-            return await PostRequestAsync<List<ContractInvation>>("/api/auth/searchContactInvationToOthers");
+            var result = await PostRequestAsync<List<ContractInvation>>("/api/auth/searchContactInvationToOthers");
+            if (result.Ok)
+            {
+                foreach (var c in result.Data)
+                {
+                    c.User = await QueryUser(c.FriendName);
+                }
+            }
+            return result;
         }
 
         #endregion
@@ -417,17 +474,25 @@ namespace FlowChatApp.Service
         #region user
         public async Task<Result<User>> GetUserInfo(string username)
         {
-            return await GetRequestAsync<User>($"/api/auth/searchUserInfo?username={username}");
+            var result = await GetRequestAsync<User>($"/api/auth/searchUserInfo?username={username}");
+            if (result.Ok)
+            {
+                result.Data = MergeUserInfo(result.Data);
+            }
+            return result;
         }
         public async Task<Result<List<User>>> SearchUser(SearchType type, string value)
         {
-            return await GetRequestAsync<List<User>>($"/api/auth/findUser?username={value}");
+            var result = await GetRequestAsync<List<User>>($"/api/auth/findUser?username={value}");
+            return result;
         }
         public async Task<Result<byte[]>> GetAvator(string username)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/auth/downloadImage?userName={username}", _cancellationToken);
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/auth/downloadImage?username={username}");
+                requestMessage.Headers.Add("token", _token);
+                var response = await _httpClient.SendAsync(requestMessage, _cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -435,6 +500,7 @@ namespace FlowChatApp.Service
                 }
                 else
                 {
+                    var vvv = await response.Content.ReadAsStringAsync();
                     var content = await response.Content.ReadAsByteArrayAsync();
                     if (content.Length == 0)
                     {
@@ -474,7 +540,11 @@ namespace FlowChatApp.Service
                 {
                     return Result<List<Group>>.ErrorMessage("Error");
                 }
-                var g = new Group { Name = group["groupName"].Value<string>() };
+                var g = new Group
+                {
+                    Name = group["groupName"].Value<string>(),
+                    Id = group["groupId"].Value<long>()
+                };
                 if (!(group["groupMemberInfos"] is JArray groupMemberInfos))
                 {
                     return Result<List<Group>>.ErrorMessage("Error");
@@ -484,33 +554,21 @@ namespace FlowChatApp.Service
                     var user = member.ToObject<User>();
                     g.Members.Add(user);
                 }
-                list.Add(g);
+                list.Add(MergeGroupInfo(g));
             }
             return new Result<List<Group>>(ResultCode.Ok, "OK", list);
         }
         public async Task<Result> JoinGroup(long groupId)
         {
-            var jObject = new JObject()
-            {
-                ["groupId"] = groupId,
-            };
-            return await PostRequestAsync("/api/auth/joinGroup", jObject);
+            return await GetRequestAsync($"/api/auth/joinGroup?groupId={groupId}");
         }
         public async Task<Result> CreateGroup(string groupName)
         {
-            var jObject = new JObject()
-            {
-                ["groupName"] = groupName
-            };
-            return await PostRequestAsync("/api/auth/addGroup", jObject);
+            return await GetRequestAsync($"/api/auth/addGroup?groupName={groupName}");
         }
         public async Task<Result> LeaveGroup(long groupId)
         {
-            var jObject = new JObject()
-            {
-                ["groupId"] = groupId,
-            };
-            return await PostRequestAsync("/api/auth/leaveGroup", jObject);
+            return await PostRequestAsync($"/api/auth/leaveGroup?groupId={groupId}");
         }
         public async Task<Result<Group>> GetGroup(long groupId)
         {
@@ -539,34 +597,21 @@ namespace FlowChatApp.Service
                 var user = member.ToObject<User>();
                 g.Members.Add(user);
             }
+            g = MergeGroupInfo(g);
             return new Result<Group>(result.Code, result.Message, g);
 
         }
         public async Task<Result> AddGroupMember(string groupName, string userName)
         {
-            var jObject = new JObject()
-            {
-                ["groupName"] = groupName,
-                ["userName"] = userName
-            };
-            return await PostRequestAsync("/api/auth/addGroupMember", jObject);
+            return await GetRequestAsync($"/api/auth/addGroupMember?groupName={groupName}&userName={userName}");
         }
         public async Task<Result> DeleteGroup(long groupId)
         {
-            var jObject = new JObject()
-            {
-                ["groupId"] = groupId
-            };
-            return await PostRequestAsync("/api/auth/deleteGroup", jObject);
+            return await PostRequestAsync($"/api/auth/deleteGroup?groupId={groupId}");
         }
         public async Task<Result> RenameGroup(long groupId, string newName)
         {
-            var jObject = new JObject()
-            {
-                ["groupId"] = groupId,
-                ["newName"] = newName
-            };
-            return await PostRequestAsync("/api/auth/modifyGroup", jObject);
+            return await GetRequestAsync($"/api/auth/modifyGroup?groupId={groupId}&newName={newName}");
         }
         public async Task<Result<List<Group>>> SearchGroups(string name)
         {
@@ -598,6 +643,7 @@ namespace FlowChatApp.Service
                     var user = member.ToObject<User>();
                     g.Members.Add(user);
                 }
+                g = MergeGroupInfo(g);
                 list.Add(g);
             }
             return new Result<List<Group>>(ResultCode.Ok, "OK", list);

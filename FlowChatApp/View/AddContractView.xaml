@@ -14,17 +14,11 @@
              d:DesignWidth="300"
              d:DataContext="{Binding Path=AddContract, Source={StaticResource Locator}}"
              DataContext="{Binding Path=AddContract, Source={StaticResource Locator}}">
-    <UserControl.Resources>
-        <DataTemplate DataType="{x:Type vm:AddContractMessageViewModel}">
-            <local:AddContractMessageView />
-        </DataTemplate>
-    </UserControl.Resources>
     <md:DialogHost HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
+                   DialogContent="{Binding DialogContent}"
+                   IsOpen="{Binding IsDialogOpen}"
                    CloseOnClickAway="True">
-        <md:DialogHost.DialogContent>
-            <ContentControl Content="{Binding}" />
-        </md:DialogHost.DialogContent>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

@@ -85,7 +85,8 @@
                   BorderThickness="0,1,0,1"
                   Background="{x:Null}"
                   HorizontalContentAlignment="Stretch"
-                  ItemsSource="{Binding CurrentChat.Messages}">
+                  ItemsSource="{Binding CurrentChat.Messages}"
+                  x:Name="MessageListView">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ContentControl Content="{Binding}">

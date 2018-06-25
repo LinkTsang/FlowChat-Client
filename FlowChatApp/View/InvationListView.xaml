@@ -7,28 +7,39 @@
              xmlns:m="clr-namespace:FlowChatApp.Model"
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
-             d:DesignHeight="450"
-             d:DesignWidth="400"
+             d:DesignHeight="608.108"
+             d:DesignWidth="555.068"
              d:DataContext="{Binding Path=InvationList, Source={StaticResource Locator}}"
              DataContext="{Binding Path=InvationList, Source={StaticResource Locator}}">
     <UserControl.Resources>
         <DataTemplate x:Key="ContractInvationTemplate"
                       DataType="{x:Type m:ContractInvation}">
             <ContentControl>
-                <WrapPanel>
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Top">
                     <Image Width="50"
                            Height="50"
+                           Margin="5"
                            Source="{Binding User.Avatar}" />
                     <StackPanel>
-                        <TextBlock Text="{Binding User.Username}"
-                                   TextWrapping="NoWrap" />
-                        <TextBlock Text="{Binding Message}" />
-                        <StackPanel Orientation="Horizontal">
-                            <Button Margin="0 5 10 5">ACCEPT</Button>
-                            <Button Margin="0 5 10 5">REJECT</Button>
+                        <WrapPanel>
+                            <TextBlock Text="{Binding User.Username}"
+                                       TextWrapping="NoWrap"
+                                       Foreground="{DynamicResource md:PrimaryHueLightForegroundBrush}" />
+                            <TextBlock Text=" required to add as a contract:"
+                                       TextWrapping="NoWrap" />
+                        </WrapPanel>
+                        <TextBlock Text="{Binding Message}"
+                                   Margin="2" />
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="2">
+                            <Button Margin="0 5 10 5"
+                                    Style="{StaticResource MaterialDesignFlatButton}">ACCEPT</Button>
+                            <Button Margin="0 5 10 5"
+                                    Style="{StaticResource MaterialDesignFlatButton}">REJECT</Button>
                         </StackPanel>
                     </StackPanel>
-                </WrapPanel>
+                </StackPanel>
             </ContentControl>
         </DataTemplate>
     </UserControl.Resources>
@@ -38,14 +49,84 @@
                   Background="{x:Null}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.Style>
-                            <Style TargetType="{x:Type ContentControl}">
-                                <Setter Property="ContentTemplate"
-                                        Value="{StaticResource ContractInvationTemplate}" />
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Top">
+                        <StackPanel.Resources>
+                            <Style x:Key="ActionArea"
+                                   TargetType="{x:Type StackPanel}">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsUnhandled}"
+                                                 Value="True">
+                                        <Setter Property="Visibility"
+                                                Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
+                            <Style x:Key="AcceptArea"
+                                   TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAccepted}"
+                                                 Value="True">
+                                        <Setter Property="Visibility"
+                                                Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                            <Style x:Key="RejectArea"
+                                   TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsRejected}"
+                                                 Value="True">
+                                        <Setter Property="Visibility"
+                                                Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Resources>
+                        <Image Width="50"
+                               Height="50"
+                               Margin="5"
+                               Source="{Binding User.Avatar}" />
+                        <StackPanel>
+                            <WrapPanel>
+                                <TextBlock Text="{Binding User.Username}"
+                                           TextWrapping="NoWrap"
+                                           Foreground="{DynamicResource md:PrimaryHueLightForegroundBrush}" />
+                                <TextBlock Text=" required to add as a contract:"
+                                           TextWrapping="NoWrap" />
+                            </WrapPanel>
+                            <TextBlock Text="{Binding Message}"
+                                       Margin="2" />
+                            <TextBlock Style="{StaticResource AcceptArea}"
+                                       Margin="2"
+                                       FontStyle="Italic"
+                                       Text="ACCEPTED" />
+                            <TextBlock Style="{StaticResource RejectArea}"
+                                       Text="REJECTED"
+                                       FontStyle="Italic"
+                                       Margin="2" />
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="2"
+                                        Style="{StaticResource ActionArea}">
+                                <Button Margin="0 5 10 5"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.AcceptCommand}"
+                                        CommandParameter="{Binding}"
+                                        IsEnabled="{Binding IsUnhandled}">ACCEPT</Button>
+                                <Button Margin="0 5 10 5"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RejectCommand}"
+                                        CommandParameter="{Binding}"
+                                        IsEnabled="{Binding IsUnhandled}">REJECT</Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

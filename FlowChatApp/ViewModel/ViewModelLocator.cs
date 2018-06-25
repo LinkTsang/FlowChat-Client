@@ -48,8 +48,7 @@ namespace FlowChatApp.ViewModel
             SimpleIoc.Default.Register<AddContractViewModel>();
             SimpleIoc.Default.Register<AddGroupViewModel>();
 
-            SimpleIoc.Default.Register<ErrorMessageViewModel>();
-            SimpleIoc.Default.Register<AddContractMessageViewModel>();
+            SimpleIoc.Default.Register<MessageBoxViewModel>();
             SimpleIoc.Default.Register<InvationListViewModel>();
         }
 
@@ -107,13 +106,9 @@ namespace FlowChatApp.ViewModel
         {
             get => ServiceLocator.Current.GetInstance<AddContractViewModel>();
         }
-        public AddContractMessageViewModel AddContractMessage
+        public MessageBoxViewModel MessageBox
         {
-            get => ServiceLocator.Current.GetInstance<AddContractMessageViewModel>();
-        }
-        public ErrorMessageViewModel ErrorMessage
-        {
-            get => ServiceLocator.Current.GetInstance<ErrorMessageViewModel>();
+            get => ServiceLocator.Current.GetInstance<MessageBoxViewModel>();
         }
 
         public InvationListViewModel InvationList

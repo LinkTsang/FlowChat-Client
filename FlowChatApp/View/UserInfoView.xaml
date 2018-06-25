@@ -32,7 +32,7 @@
                             <Setter Property="Text" Value="{Binding Contract.Alias}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Contract.Alias}" Value="">
-                                    <Setter Property="Text" Value="{Binding Contract.User.UserName}"/>
+                                    <Setter Property="Text" Value="{Binding Contract.User.Username}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -43,7 +43,6 @@
             <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
                 <Grid  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -71,22 +70,20 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Resources>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ID"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Contract.User.Id}"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Catagory"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Contract.Category}"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="UserName"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Contract.User.UserName}"/>
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="NickName"/>
-                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Contract.User.NickName}"/>
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Contract.User.Email}"/>
-                    <TextBlock Grid.Row="5" Grid.Column="0"  Text="Phone"/>
-                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Contract.User.Phone}"/>
-                    <TextBlock Grid.Row="6" Grid.Column="0"  Text="Region"/>
-                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Contract.User.Region}"/>
-                    <TextBlock Grid.Row="7" Grid.Column="0"  Text="Gender"/>
-                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Contract.User.Gender}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Catagory"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Contract.Category}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="UserName"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Contract.User.Username}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="NickName"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Contract.User.Nickname}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Email"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Contract.User.Email}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0"  Text="Phone"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Contract.User.Phone}"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0"  Text="Region"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Contract.User.Region}"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0"  Text="Gender"/>
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Contract.User.Gender}"/>
                 </Grid>
 
             </ScrollViewer>

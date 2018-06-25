@@ -266,5 +266,7 @@ namespace FlowChatApp.Model
         }
 
         public ImageSource Avatar => User.DefaultAvatarImage;
+
+        public string PeerName => "System Messages";
     }
 }

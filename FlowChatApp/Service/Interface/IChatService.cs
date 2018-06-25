@@ -18,8 +18,8 @@ namespace FlowChatApp.Service.Interface
     {
         event EventHandler<PrivateMessage> PrivateChatMessageReceived;
         event EventHandler<GroupMessage> GroupChatMessageReceived;
-        event EventHandler<ContractInvation> ContactRequsetMessageReceived;
-        event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
+        event EventHandler<List<ContractInvation>> ContactRequestMessagesUpdated;
+        event EventHandler<List<ContractInvation>> ContactConfirmationMessageReceived;
         event EventHandler<Result> BadRequestRaised;
 
         void Handle();
@@ -40,7 +40,7 @@ namespace FlowChatApp.Service.Interface
         Task<Result> DeleteContact(string username);
         Task<Result> UpdateContact(string username, string alias);
         Task<Result<List<ContractInvation>>> GetContractInvations();
-        Task<Result> ConfirmContractInvation(string recordId, string categoryName, bool accept);
+        Task<Result> ConfirmContractInvation(long recordId, string categoryName, bool accept);
         Task<Result<List<ContractInvation>>> GetInvationConfirmations();
 
         #endregion

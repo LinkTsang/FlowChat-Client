@@ -44,8 +44,8 @@ namespace FlowChatApp.Service
         }
         public event EventHandler<PrivateMessage> PrivateChatMessageReceived;
         public event EventHandler<GroupMessage> GroupChatMessageReceived;
-        public event EventHandler<ContractInvation> ContactRequsetMessageReceived;
-        public event EventHandler<InvationConfirmation> ContactConfirmationMessageReceived;
+        public event EventHandler<List<ContractInvation>> ContactRequestMessagesUpdated;
+        public event EventHandler<List<ContractInvation>> ContactConfirmationMessageReceived;
         public event EventHandler<Result> BadRequestRaised;
 
         #region account
@@ -115,7 +115,9 @@ namespace FlowChatApp.Service
                 if (user != null)
                 {
                     var invation = new ContractInvation(GenContractInvationId(), username, message);
-                    ContactRequsetMessageReceived?.Invoke(this, invation);
+                    var list = new List<ContractInvation>();
+                    list.Add(invation);
+                    ContactRequestMessagesUpdated?.Invoke(this, list);
                     return Result.OKRequest;
                 }
             }
@@ -143,7 +145,7 @@ namespace FlowChatApp.Service
             var result = new Result<List<ContractInvation>>(ResultCode.Ok, "OK", null);
             return result;
         }
-        public async Task<Result> ConfirmContractInvation(string recordId, string categoryName, bool accept)
+        public async Task<Result> ConfirmContractInvation(long recordId, string categoryName, bool accept)
         {
             var result = new Result(ResultCode.Ok, "OK", null);
             return result;

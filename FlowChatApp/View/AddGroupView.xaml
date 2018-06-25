@@ -13,43 +13,14 @@
              d:DataContext="{Binding Path=AddGroup, Source={StaticResource Locator}}">
     <UserControl.Resources>
         <Grid x:Key="CreateGroupDialog">
-            <StackPanel Margin="16">
-                <TextBlock> Add a new group.</TextBlock>
-                <TextBox Margin="0 8 0 0"
-                         HorizontalAlignment="Stretch"/>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-                    <Button Style="{StaticResource MaterialDesignFlatButton}"
-                            IsDefault="True"
-                            Margin="0 8 8 0"
-                            Command="md:DialogHost.CloseDialogCommand">
-                        <Button.CommandParameter>
-                            <system:Boolean xmlns:system="clr-namespace:System;assembly=mscorlib">
-                                True
-                            </system:Boolean>
-                        </Button.CommandParameter>
-                        ACCEPT
-                    </Button>
-                    <Button Style="{StaticResource MaterialDesignFlatButton}"
-                            IsCancel="True"
-                            Margin="0 8 8 0"
-                            Command="md:DialogHost.CloseDialogCommand">
-                        <Button.CommandParameter>
-                            <system:Boolean xmlns:system="clr-namespace:System;assembly=mscorlib">
-                                False
-                            </system:Boolean>
-                        </Button.CommandParameter>
-                        CANCEL
-                    </Button>
-                </StackPanel>
-            </StackPanel>
+
         </Grid>
     </UserControl.Resources>
     <md:DialogHost HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch">
-        <md:DialogHost.DialogContent>
-            <ContentControl Content="{StaticResource CreateGroupDialog}" />
-        </md:DialogHost.DialogContent>
+                   VerticalAlignment="Stretch"
+                   DialogContent="{Binding AddNewGroupDialogContent}"
+                   IsOpen="{Binding IsAddNewGroupDialogOpen}"
+                   CloseOnClickAway="True">
         <Grid>
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -95,16 +66,14 @@
                                         HorizontalAlignment="Right"
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         Command="{Binding AddCommand}"
-                                        CommandParameter="{Binding}">
-                                    JOIN
-                                </Button>
+                                        CommandParameter="{Binding}">JOIN</Button>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListView>
             </StackPanel>
             <Button Style="{DynamicResource MaterialDesignFloatingActionMiniAccentButton}"
-                    Command="{x:Static md:DialogHost.OpenDialogCommand}"
+                    Command="{Binding NewGroupCommand}"
                     Margin="0,0,10,10"
                     Height="40"
                     Width="40"

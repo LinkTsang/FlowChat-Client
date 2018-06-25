@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using CommonServiceLocator;
 using FlowChatApp.Model;
 using FlowChatApp.Service.Interface;
+using FlowChatApp.View;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using MaterialDesignThemes.Wpf;
 
 namespace FlowChatApp.ViewModel
 {
@@ -20,6 +22,8 @@ namespace FlowChatApp.ViewModel
             AddCommand = new RelayCommand<Group>(JoinGroup);
             SearchCommand = new RelayCommand(SearchGroup);
             NewGroupCommand = new RelayCommand(NewGroup);
+            DialogAcceptCommand = new RelayCommand(DialogAccept);
+            DialogCancelCommand = new RelayCommand(DialogCancel);
             if (IsInDesignMode)
             {
                 SetUpDesignData();
@@ -56,7 +60,9 @@ namespace FlowChatApp.ViewModel
         public RelayCommand<Group> AddCommand { get; }
         async void JoinGroup(Group group)
         {
-            await ChatService.JoinGroup(group.Id);
+            var result = await ChatService.JoinGroup(group.Id);
+            DialogContent = new MessageBoxDialogView(result.Message);
+            IsDialogOpen = true;
         }
 
         public RelayCommand SearchCommand { get; }
@@ -64,14 +70,47 @@ namespace FlowChatApp.ViewModel
         {
             var results = (await ChatService.SearchGroups(SearchText)).Data;
             Groups.Clear();
-            results.ForEach(g => Groups.Add(g));
+            results?.ForEach(g => Groups.Add(g));
         }
 
+
+        object _dialogContent;
+        public object DialogContent
+        {
+            get => _dialogContent;
+            set => Set(ref _dialogContent, value);
+        }
+        bool _isDialogOpen;
+        public bool IsDialogOpen
+        {
+            get => _isDialogOpen;
+            set => Set(ref _isDialogOpen, value);
+        }
+        string _groupNameToCreate;
+        public string GroupNameToCreate
+        {
+            get => _groupNameToCreate;
+            set => Set(ref _groupNameToCreate, value);
+        }
         public RelayCommand NewGroupCommand { get; }
         async void NewGroup()
         {
-
+            GroupNameToCreate = string.Empty;
+            DialogContent = new AddNewGroupDialog();
+            IsDialogOpen = true;
         }
-
+        public RelayCommand DialogAcceptCommand { get; }
+        async void DialogAccept()
+        {
+            IsDialogOpen = false;
+            var result = await ChatService.CreateGroup(GroupNameToCreate);
+            DialogContent = new MessageBoxDialogView(result.Message);
+            IsDialogOpen = true;
+        }
+        public RelayCommand DialogCancelCommand { get; }
+        async void DialogCancel()
+        {
+            IsDialogOpen = false;
+        }
     }
 }

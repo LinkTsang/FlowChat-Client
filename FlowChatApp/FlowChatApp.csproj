@@ -33,6 +33,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>chat.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.2.0.2\lib\net47\CommonServiceLocator.dll</HintPath>
@@ -131,7 +134,7 @@
     <Compile Include="Service\DemoChatService.cs" />
     <Compile Include="Utility\DispatcherFetcher.cs" />
     <Compile Include="ViewModel\AddGroupViewModel.cs" />
-    <Compile Include="ViewModel\ErrorMessageViewModel.cs" />
+    <Compile Include="ViewModel\MessageBoxViewModel.cs" />
     <Compile Include="ViewModel\InvationListViewModel.cs" />
     <Compile Include="ViewModel\LoginViewModel.cs" />
     <Compile Include="ViewModel\AddContractViewModel.cs" />
@@ -139,9 +142,8 @@
     <Compile Include="ViewModel\SignUpViewModel.cs" />
     <Compile Include="ViewModel\GroupInfoViewModel.cs" />
     <Compile Include="ViewModel\AccountInfoViewModel.cs" />
-    <Compile Include="ViewModel\AddContractMessageViewModel.cs" />
-    <Compile Include="View\AddContractMessageView.xaml.cs">
-      <DependentUpon>AddContractMessageView.xaml</DependentUpon>
+    <Compile Include="View\AddContractMessageDialog.xaml.cs">
+      <DependentUpon>AddContractMessageDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\AddContractView.xaml.cs">
       <DependentUpon>AddContractView.xaml</DependentUpon>
@@ -149,11 +151,14 @@
     <Compile Include="View\AddGroupView.xaml.cs">
       <DependentUpon>AddGroupView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\AddNewGroupDialog.xaml.cs">
+      <DependentUpon>AddNewGroupDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\InvationListView.xaml.cs">
       <DependentUpon>InvationListView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\ErrorMessageView.xaml.cs">
-      <DependentUpon>ErrorMessageView.xaml</DependentUpon>
+    <Compile Include="View\MessageBoxDialog.xaml.cs">
+      <DependentUpon>MessageBoxDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Interface\ISignUpView.cs" />
     <Compile Include="View\Interface\ISignInView.cs" />
@@ -179,7 +184,7 @@
     <Compile Include="View\UserInfoView.xaml.cs">
       <DependentUpon>UserInfoView.xaml</DependentUpon>
     </Compile>
-    <Page Include="View\AddContractMessageView.xaml">
+    <Page Include="View\AddContractMessageDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -188,6 +193,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\AddGroupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\AddNewGroupDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -203,7 +212,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\ErrorMessageView.xaml">
+    <Page Include="View\MessageBoxDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -329,6 +338,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\ai.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="chat.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

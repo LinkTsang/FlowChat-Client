@@ -20,7 +20,7 @@
                 <Image Source="{Binding Account.Avatar}" Stretch="UniformToFill" HorizontalAlignment="Center"/>
             </Button>
             <StackPanel Grid.Row="1" Margin="10,20,10,5">
-                <TextBlock Foreground="{DynamicResource PrimaryHueMidBrush}"  Text="{Binding Account.UserName}" FontSize="25" HorizontalAlignment="Center"/>
+                <TextBlock Foreground="{DynamicResource PrimaryHueMidBrush}"  Text="{Binding Account.Username}" FontSize="25" HorizontalAlignment="Center"/>
                 <TextBox Foreground="{DynamicResource PrimaryHueLightBrush}" 
                          HorizontalAlignment="Center"
                          FontSize="12" TextWrapping="Wrap"
@@ -68,10 +68,10 @@
                             </Style>
                         </ResourceDictionary>
                     </Grid.Resources>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ID"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Account.Id}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="UserName"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Account.Username}"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="NickName"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Account.NickName}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Account.Nickname}"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Email"/>
                     <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Account.Email}"/>
                     <TextBlock Grid.Row="3" Grid.Column="0"  Text="Phone"/>

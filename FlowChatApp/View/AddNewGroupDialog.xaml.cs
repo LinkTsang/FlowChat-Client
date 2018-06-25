@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace FlowChatApp.View
 {
     /// <summary>
-    /// ErrorMessageView.xaml 的交互逻辑
+    /// AddNewGroup.xaml 的交互逻辑
     /// </summary>
-    public partial class ErrorMessageView : UserControl
+    public partial class AddNewGroupDialog : UserControl
     {
-        public ErrorMessageView()
+        public AddNewGroupDialog()
         {
             InitializeComponent();
         }

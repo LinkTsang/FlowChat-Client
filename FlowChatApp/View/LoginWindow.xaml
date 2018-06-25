@@ -10,6 +10,7 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Title="Flow Chat" Height="300" Width="400"
+        Icon="pack://application:,,,/FlowChatApp;component/Images/chat.png"
         DataContext="{Binding Path=Login, Source={StaticResource Locator}}"
         d:DataContext="{Binding Path=Login, Source={StaticResource Locator}}">
     <Window.Resources>

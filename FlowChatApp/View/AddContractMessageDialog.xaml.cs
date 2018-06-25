@@ -18,9 +18,9 @@ namespace FlowChatApp.View
     /// <summary>
     /// AddGroupView.xaml 的交互逻辑
     /// </summary>
-    public partial class AddContractMessageView : Window
+    public partial class AddContractMessageDialog : UserControl
     {
-        public AddContractMessageView()
+        public AddContractMessageDialog()
         {
             InitializeComponent();
         }

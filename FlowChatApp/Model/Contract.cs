@@ -56,7 +56,14 @@ namespace FlowChatApp.Model
     {
         public ContractInvation()
         {
-
+            PropertyChanged += (sender, e) => {
+                if(e.PropertyName == nameof(Tag))
+                {
+                    RaisePropertyChanged(nameof(IsAccepted));
+                    RaisePropertyChanged(nameof(IsRejected));
+                    RaisePropertyChanged(nameof(IsUnhandled));
+                }
+            };
         }
 
         public ContractInvation(long recordId, string friendName, string message)
@@ -92,6 +99,27 @@ namespace FlowChatApp.Model
             set => Set(ref _user, value);
         }
 
+        int _tag;
+        public int Tag
+        {
+            get => _tag;
+            set => Set(ref _tag, value);
+        }
+
+        public bool IsAccepted
+        {
+            get => Tag == 2;
+        }
+
+        public bool IsRejected
+        {
+            get => Tag == 3;
+        }
+
+        public bool IsUnhandled
+        {
+            get => Tag == 1;
+        }
     }
 
     public class InvationConfirmation : ViewModelBase

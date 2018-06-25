@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
 using System.Collections.Generic;
+using GalaSoft.MvvmLight.Messaging;
 
 namespace FlowChatApp.ViewModel
 {
@@ -154,37 +155,71 @@ namespace FlowChatApp.ViewModel
         SystemChat _systemChat = new SystemChat();
         async void SetUpData()
         {
-            Chats.Add(_systemChat);
-            CurrentChat = _systemChat;
-            InvationListViewModel.Invations.Clear();
-            var contractInvationsResult = await ChatService.GetContractInvations();
-            var invations = contractInvationsResult.Data;
-            invations?.ForEach(i => InvationListViewModel.Invations.Add(i));
-
+            {
+                Chats.Add(_systemChat);
+                CurrentChat = _systemChat;
+                InvationListViewModel.Invations.Clear();
+                var contractInvationsResult = await ChatService.GetContractInvations();
+                var invations = contractInvationsResult.Data;
+                invations?.ForEach(i => InvationListViewModel.Invations.Add(i));
+            }
 
             var result = await ChatService.GetAccountInfo();
             CurrentAccount = result.Data;
 
             var contracts = (await ChatService.GetContracts()).Data;
-            contracts.ForEach(c => Contracts.Add(c));
+            contracts?.ForEach(c => Contracts.Add(c));
 
             var groups = (await ChatService.GetGroups()).Data;
-            groups.ForEach(c => Groups.Add(c));
+            groups?.ForEach(c => Groups.Add(c));
 
             var chats = (await ChatService.GetChatHistory()).Data;
-            chats.ForEach(c => Chats.Add(c));
+            chats?.ForEach(c => Chats.Add(c));
 
             ChatService.PrivateChatMessageReceived += (sender, message) =>
             {
                 var peerName = message.Sender.Username == CurrentAccount.Username
                      ? message.Receiver.Username
                      : message.Sender.Username;
-                GetPrivateChat(peerName).AddMessage(message);
+                var chat = GetPrivateChat(peerName);
+                chat.AddMessage(message);
+                if (CurrentChat == chat)
+                {
+                    Messenger.Default.Send(new NotificationMessage("ScrollIntoView"));
+                }
             };
 
             ChatService.GroupChatMessageReceived += (sender, message) =>
             {
-                GetGroupChat(message.Group.Id).AddMessage(message);
+                var chat = GetGroupChat(message.Group.Id);
+                chat.AddMessage(message);
+                if (CurrentChat == chat)
+                {
+                    Messenger.Default.Send(new NotificationMessage("ScrollIntoView"));
+                }
+            };
+
+            ChatService.ContactRequestMessagesUpdated += (sender, messages) =>
+            {
+                var invations = InvationListViewModel.Invations;
+                foreach (var m in messages)
+                {
+                    var invation = invations.FirstOrDefault(i => {
+                        if(i == null)
+                        {
+                            return false;
+                        }
+                        return i.RecordId == m.RecordId;
+                    });
+                    if (invation == null)
+                    {
+                        invations.Add(invation);
+                    }
+                    else
+                    {
+                        invation.Tag = m.Tag;
+                    }
+                }
             };
 
             ChatService.Handle();
@@ -251,7 +286,7 @@ namespace FlowChatApp.ViewModel
         }
         IWindowService WindowService => ServiceLocator.Current.GetInstance<IWindowService>();
 
-        ErrorMessageViewModel ErrorMessageViewModel => ServiceLocator.Current.GetInstance<ErrorMessageViewModel>();
+        MessageBoxViewModel ErrorMessageViewModel => ServiceLocator.Current.GetInstance<MessageBoxViewModel>();
         public RelayCommand ShowAccountInfoCommand { get; }
         public void ShowAccountInfo()
         {
@@ -273,6 +308,14 @@ namespace FlowChatApp.ViewModel
                     {
                         ErrorMessageViewModel.Message = result.Message;
                         WindowService.ShowDialog(ErrorMessageViewModel);
+                    }
+                }
+                else
+                {
+                    var result = await ChatService.GetAccountInfo();
+                    if (result.Ok)
+                    {
+                        CurrentAccount = result.Data;
                     }
                 }
             });

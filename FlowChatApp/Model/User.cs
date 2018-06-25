@@ -21,9 +21,9 @@ namespace FlowChatApp.Model
 
     public enum Gender
     {
-        Unknown = 0,
-        Boy = 1,
-        Girl = 2
+        Unknown = -1,
+        Boy = 0,
+        Girl = 1
     }
 
     public class User : ObservableObject
@@ -97,11 +97,11 @@ namespace FlowChatApp.Model
         {
             switch (e.PropertyName)
             {
-                //case nameof(HeadUrl):
-                //    {
-                //        RaisePropertyChanged(nameof(Avatar));
-                //        break;
-                //    }
+                case nameof(HeadUrl):
+                    {
+                        UpdateAvatar();
+                        break;
+                    }
             }
         }
 
@@ -197,7 +197,7 @@ namespace FlowChatApp.Model
 
         async Task<ImageSource> LoadAvatar()
         {
-            if(string.IsNullOrEmpty(HeadUrl))
+            if (string.IsNullOrEmpty(HeadUrl))
             {
                 return null;
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GalaSoft.MvvmLight.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,14 @@ namespace FlowChatApp.View
         public ChatView()
         {
             InitializeComponent();
+            Messenger.Default.Register<NotificationMessage>(this, NotificationMessageReceived);
+        }
+
+        void NotificationMessageReceived(NotificationMessage msg)
+        {
+            if (msg.Notification != "ScrollIntoView") return;
+            MessageListView.SelectedIndex = MessageListView.Items.Count - 1;
+            MessageListView.ScrollIntoView(MessageListView.SelectedItem);
         }
     }
 }

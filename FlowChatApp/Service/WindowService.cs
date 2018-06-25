@@ -39,25 +39,5 @@ namespace FlowChatApp.Service
                 closeingAction?.Invoke(args.Parameter);
             });
         }
-
-
-
-        AddContractMessageView _addContractMessageView;
-        public void ShowAddContractWindow()
-        {
-            if (_addContractMessageView == null)
-            {
-                _addContractMessageView = new AddContractMessageView();
-            }
-            _addContractMessageView.Show();
-        }
-
-        public void CloseAddContractWindow()
-        {
-            if (_addContractMessageView != null)
-            {
-                _addContractMessageView.Hide();
-            }
-        }
     }
 }

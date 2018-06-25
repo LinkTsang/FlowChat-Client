@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace FlowChatApp.ViewModel
 {
-    public class ErrorMessageViewModel : ViewModelBase
+    public class MessageBoxViewModel : ViewModelBase
     {
-        public ErrorMessageViewModel()
+        public MessageBoxViewModel()
         {
             if (IsInDesignMode)
             {
+                Title = "flowchat: ";
                 Message = "oops...";
             }
         }
@@ -22,6 +23,14 @@ namespace FlowChatApp.ViewModel
         {
             get => _message;
             set => Set(ref _message, value);
+        }
+
+        string _title;
+
+        public string Title
+        {
+            get => _title;
+            set => Set(ref _title, value);
         }
     }
 }
